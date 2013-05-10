@@ -1,13 +1,17 @@
 #! /usr/bin/python
 
-import os
+import my_functions
+import user
+
+home = user.home
+dir = "pdsh-files"
+hosts_file = "all-network-hosts"
+hosts_list = open(home + "/" + dir + "/" + hosts_file, "r")
+hosts = [line.strip() for line in hosts_list]
 
 
-def hostAlive():
-    hosts_list_org = open("/home/myakove/pdsh-files/all-network-hosts", "r")
-    hosts_list = [line.strip() for line in hosts_list_org]
-    for host in hosts_list:
-        if not os.system("ssh -o ConnectTimeout=5 root@" + host + " exit"):
-            print "%s is alive" % host
-        else:
-            print "%s is down" % host
+for host in hosts_list:
+    if not my_functions.hostAlive(host):
+        print "%s is alive" % host
+    else:
+        print "%s is down" % host

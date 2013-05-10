@@ -4,14 +4,18 @@ import re
 import os
 import user
 
-home = user.home
-ssh_dir = ".ssh"
-ssh_file = "known_hosts"
-ssh_path = home + '/' + ssh_dir + '/' + ssh_file
-
 
 def autoSSH(host):
-    know_host = open(ssh_path)
+    '''
+    host = host to connect to
+    Get remote host ssh key and add it to local know_hosts file
+    ssh-copy-id to remote host to enable ssh connect without password
+    '''
+    home = user.home
+    ssh_dir = ".ssh"
+    ssh_file = "known_hosts"
+    ssh_path = home + '/' + ssh_dir + '/' + ssh_file
+    know_host = open(ssh_path, "r")
     for line in file.readlines(know_host):
         if re.search(host, line):
             os.system("ssh-keygen -R " + host)
@@ -24,11 +28,12 @@ def autoSSH(host):
     return True
 
 
-def hostAlive():
-    hosts_list_org = open("/home/myakove/pdsh-files/all-network-hosts", "r")
-    hosts_list = [line.strip() for line in hosts_list_org]
-    for host in hosts_list:
-        if not os.system("ssh -o ConnectTimeout=5 root@" + host + " exit"):
-            print "%s is alive" % host
-        else:
-            print "%s is down" % host
+def hostAlive(host):
+    '''
+    host = host to connect to
+    Check if remote host is alive using ssh
+    '''
+    if not os.system("ssh -o ConnectTimeout=5 root@" + host + " exit"):
+        print "%s is alive" % host
+    else:
+        print "%s is down" % host
