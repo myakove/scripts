@@ -33,7 +33,7 @@ def hostAlive(host):
     host = host to connect to
     Check if remote host is alive using ssh
     '''
-    if not os.system("ssh -o ConnectTimeout=5 root@" + host + " exit"):
-        print "%s is alive" % host
-    else:
+    if os.system("ssh -o ConnectTimeout=5 root@" + host + " exit"):
         print "%s is down" % host
+    else:
+        print "%s is alive" % host
