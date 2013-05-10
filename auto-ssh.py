@@ -10,6 +10,7 @@ ssh_dir = ".ssh"
 ssh_file = "known_hosts"
 ssh_path = home + '/' + ssh_dir + '/' + ssh_file
 
+
 def autoSSH(host):
     know_host = open(ssh_path)
     for line in file.readlines(know_host):
