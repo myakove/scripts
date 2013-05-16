@@ -17,10 +17,12 @@ if re.search('range', input):
         host = params[0] + str(i) + params[3]
         cmd = my_functions.autoSSH(host)
         if not cmd:
-            print "\033[0;32m" + "Fail to configure auto ssh to %s" + "\033[0m" % host
+            print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
+                  "\033[0m" % host
 
 else:
     host = input
     cmd = my_functions.autoSSH(host)
     if not cmd:
-        print "\033[0;32m" + "Fail to configure auto ssh to %s" + "\033[0m" % host
+        print "\033[0;32m" + "Fail to configure auto ssh to %s" + "\033[0m"\
+              % host

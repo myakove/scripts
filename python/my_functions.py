@@ -8,9 +8,9 @@ import subprocess
 
 def autoSSH(host):
     '''
-    host = host to connect to
-    Get remote host ssh key and add it to local know_hosts file
+    Description: Get remote host ssh key and add it to local know_hosts file
     ssh-copy-id to remote host to enable ssh connect without password
+    host = host to connect to
     '''
     home = user.home
     ssh_dir = ".ssh"
@@ -34,8 +34,39 @@ def autoSSH(host):
 
 def hostAlive(host):
     '''
+    Description: Check if remote host is alive using ssh
     host = host to connect to
-    Check if remote host is alive using ssh
     '''
     if os.system("ssh -o ConnectTimeout=5 root@" + host + " exit &> /dev/null"):
         return True
+
+
+def updateRepoAndInstall(version, hosts_file):
+    '''
+    Description: Update rhevm.repo to desire build and update the hosts
+    version = build version to update to.
+    hosts_file = file with hosts to update, one host per line.
+    '''
+    user = "root"
+    repo_dir = "/etc/yum.repos.d/"
+    tmp_file = "/tmp/rhevm.repo"
+    host_list = open(hosts_file, "r")
+    host_target_list = [line.strip() for line in host_list]
+    host_target = ",".join(host_target_list)
+
+    repo_file = open(tmp_file, "w")
+    repo_file.write("[rhevm]" + "\n")
+    repo_file.write("name=RHEVM" + "\n")
+    repo_file.write("baseurl=http://bob.eng.lab.tlv.redhat.com/builds/" +
+                    version + "\n")
+    repo_file.write("gpgcheck=0" + "\n")
+    repo_file.write("enable=1" + "\n")
+    repo_file.close()
+
+    for host in host_target_list:
+        if not os.system("pdsh -w " + host + " rpm -q pdsh"):
+            os.system("pdsh -w " + host + " -l root yum install pdsh -y")
+    os.system("pdcp -w " + host_target + " -l " + user + " " + tmp_file + " " +
+              repo_dir)
+    os.system("pdsh -w '^'" + hosts_file + " -l root yum clean all")
+    os.system("pdsh -w '^'" + hosts_file + " -l root yum update -y")
