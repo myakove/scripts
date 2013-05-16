@@ -3,7 +3,7 @@
 import re
 import os
 import user
-import subprocess
+from subprocess import Popen, PIPE
 
 
 def autoSSH(host):
@@ -18,7 +18,7 @@ def autoSSH(host):
     ssh_path = home + '/' + ssh_dir + '/' + ssh_file
     know_host = open(ssh_path, "r")
     for line in file.readlines(know_host):
-        host_ip = subprocess.Popen(["host", host], stdout=subprocess.PIPE)
+        host_ip = Popen(["host", host], stdout=PIPE)
         out_host_ip, err_host_ip = host_ip.communicate()
         host_ip_addr = out_host_ip.split()
         if re.search(host, line):
@@ -70,3 +70,21 @@ def updateRepoAndInstall(version, hosts_file):
               repo_dir)
     os.system("pdsh -w '^'" + hosts_file + " -l root yum clean all")
     os.system("pdsh -w '^'" + hosts_file + " -l root yum update -y")
+
+
+def getMacAndIP(interface, host):
+    '''
+    Description: Get IP and MAC address from given host
+    interface = Name of the interface to query
+    host = Host to query
+    '''
+    mac = Popen((["ssh -o ConnectTimeout=5 root@" + host + " ifconfig " +
+                  interface +
+                  " | grep HWaddr |awk '{print $5}'"]), shell=True,
+                stdout=PIPE)
+    macout, macerr = mac.communicate()
+    ip = Popen((["ssh -o ConnectTimeout=5 root@" + host + " ifconfig " +
+                 interface + " | grep 'inet addr' |cut -d':' -f2|awk \
+                 '{print $1}'"]), shell=True, stdout=PIPE)
+    ipout, iperr = ip.communicate()
+    return macout, ipout

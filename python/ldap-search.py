@@ -14,7 +14,10 @@ if result.find('uid:') == -1:
 
 split_result = result.split('\n')
 
-param_dict = {'dn:' : 'dn', 'cn:' : 'Full Name:      ', 'uid:' : 'IRC:            ', 'mail:' : 'Email:          ', 'telephoneNumber:' : 'Office Ext:     ', 'mobile:' : 'Mobile Phone:   ', 'rhatLocation:' : 'Office Location:', 'rhatCostCenterDesc:' : 'Job Title:      '}
+param_dict = {'dn:': 'dn', 'cn:': 'Full Name:      ', 'uid:': 'IRC:           \
+              ', 'mail:': 'Email:          ', 'telephoneNumber:': 'Office Ext:\
+              ', 'mobile:': 'Mobile Phone:   ', 'rhatLocation:':\
+              'Office Location:', 'rhatCostCenterDesc:': 'Job Title:      '}
 
 for line in split_result:
     for key in param_dict.keys():
@@ -22,6 +25,7 @@ for line in split_result:
             if key == 'dn:':
                 print '\n'
             else:
-                print line.replace(key, "\033[01;10m" + param_dict[key] + "\033[0m")
+                print line.replace(key, "\033[01;10m" + param_dict[key] +
+                                   "\033[0m")
 
 print '\n'
