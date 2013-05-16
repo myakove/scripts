@@ -2,7 +2,7 @@
 
 #from __future__ import print_function
 import os
-from subprocess import *
+from subprocess import Popen, PIPE
 import sys
 
 apkpath = sys.argv[1].split('/')
