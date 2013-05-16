@@ -4,6 +4,7 @@ import re
 import os
 import user
 from subprocess import Popen, PIPE
+from commands import getoutput
 
 
 def autoSSH(host):
@@ -88,3 +89,56 @@ def getMacAndIP(interface, host):
                  '{print $1}'"]), shell=True, stdout=PIPE)
     ipout, iperr = ip.communicate()
     return macout, ipout
+
+
+def apkRename(apk_path, apk):
+    '''
+    Description: Rename apk to valid name.
+    apk = apk file to rename
+    '''
+    cmd = Popen(("aapt  d  badging " + apk),
+                shell=True,
+                stdin=PIPE, stdout=PIPE, close_fds=True)
+    fdin, fdout = cmd.stdin, cmd.stdout
+
+    data = fdout.readlines()
+    for line in data:
+        if "application: label=" in line:
+            apkname = line.split("'")[1]
+        if "pack" in line:
+            apkver = line.split("'")[5]
+
+    newapkname = str(apkname) + "-" + str(apkver) + ".apk"
+    newapkpath = apk_path[:-1]
+    newapkpath.append(newapkname)
+    newapkpathandname = '/'.join(newapkpath)
+    os.system("mv " + apk + " " + newapkpathandname)
+
+
+def ldapSearch(name):
+    search_string_uid = 'ldapsearch -x uid=*' + name + '*'
+    search_string_cn = 'ldapsearch -x cn=*' + name + '*'
+
+    result = getoutput(search_string_uid)
+    if result.find('uid:') == -1:
+        result = getoutput(search_string_cn)
+        if result.find('cn:') == -1:
+            print "\033[01;41m" + 'User not found' + "\033[0m"
+
+    split_result = result.split('\n')
+
+    param_dict = {'dn:': 'dn', 'cn:': 'Full Name:      ', 'uid:': 'IRC:       \
+     ', 'mail:': 'Email:          ', 'telephoneNumber:':
+                  'Office Ext:     ', 'mobile:': 'Mobile Phone:   ',
+                  'rhatLocation:': 'Office Location:', 'rhatCostCenterDesc:':
+                  'Job Title:      '}
+
+    for line in split_result:
+        for key in param_dict.keys():
+            if line.startswith(key):
+                if key == 'dn:':
+                    print '\n'
+                else:
+                    print line.replace(key, "\033[01;10m" + param_dict[key] +
+                                       "\033[0m")
+    print '\n'

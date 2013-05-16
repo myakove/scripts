@@ -2,10 +2,9 @@
 
 import my_functions
 import re
+import sys
 
-
-input = raw_input("\033[0;32m" + 'Hostname: ' + "\033[0m")
-
+input = sys.argv[1]
 
 if re.search('range', input):
     params = input.split("|")[:-1]
