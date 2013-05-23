@@ -18,17 +18,31 @@ def autoSSH(host):
     ssh_file = "known_hosts"
     ssh_path = home + '/' + ssh_dir + '/' + ssh_file
     know_host = open(ssh_path, "r")
+
     for line in file.readlines(know_host):
         host_ip = Popen(["host", host], stdout=PIPE)
         out_host_ip, err_host_ip = host_ip.communicate()
         host_ip_addr = out_host_ip.split()
         if re.search(host, line):
-            os.system("ssh-keygen -R " + host)
+            Popen(["ssh-keygen", "-R", host], stdout=PIPE)
         if re.search(host_ip_addr[3], line):
-            os.system("ssh-keygen -R " + host_ip_addr[3])
-    if os.system("ssh-keyscan -T 5 " + host + " | grep -v '#' &>> " + ssh_path):
+            Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
+
+    host_key = Popen(["ssh-keyscan", "-T", "5", host], stdout=PIPE)
+    host_key_out, host_key_err = host_key.communicate()
+
+    if host_key_err:
         print "\033[0;33m" + "No ssh keys from %s" % host + "\033[0m"
-    if os.system("sshpass -p 'qum5net' ssh-copy-id root@" + host):
+        return False
+
+    if host_key_out:
+        echo_cmd = 'echo " ' + host_key_out + '" >> ' + ssh_path
+        Popen([echo_cmd], stdout=PIPE, shell=True)
+
+    host_key_copy_err = Popen(["sshpass", "-p", "qum5net", "ssh-copy-id",
+                               "root@" + host], stdout=PIPE).communicate()[1]
+
+    if host_key_copy_err:
         print "\033[0;32m" + "Couldn't connect to %s" % host + "\033[0m"
     return True
 
@@ -65,7 +79,7 @@ def updateRepoAndInstall(version, hosts_file):
     repo_file.close()
 
     for host in host_target_list:
-        if not os.system("pdsh -w " + host + " rpm -q pdsh"):
+        if os.system("pdsh -w " + host + " rpm -q pdsh"):
             os.system("pdsh -w " + host + " -l root yum install pdsh -y")
     os.system("pdcp -w " + host_target + " -l " + user + " " + tmp_file + " " +
               repo_dir)
