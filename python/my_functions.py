@@ -156,3 +156,4 @@ def ldapSearch(name):
                     print line.replace(key, "\033[01;10m" + param_dict[key] +
                                        "\033[0m")
     print '\n'
+
