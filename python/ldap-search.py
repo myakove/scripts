@@ -1,8 +1,16 @@
 #! /bin/python
 
-import sys
 import my_functions
+import argparse
 
-name = sys.argv[1]
+user_input = argparse.ArgumentParser()
+user_input.add_argument("--user", "-U", help="User to sarch for.")
+option = user_input.parse_args()
+user = option.user
 
-my_functions.ldapSearch(name)
+if option.user is None:
+    print "User must be specify"
+    print user_input.format_usage()
+
+else:
+    my_functions.ldapSearch(user)
