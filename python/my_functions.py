@@ -157,3 +157,13 @@ def ldapSearch(name):
                                        "\033[0m")
     print '\n'
 
+
+def IsServiceRunnig(name):
+    cmd = Popen(["pgrep", name], stdout=PIPE)
+    out, err = cmd.communicate()
+    if out:
+        print "Service %s is running with PID %s" % (name, out)
+        return True
+    return False
+
+
