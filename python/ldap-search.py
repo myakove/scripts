@@ -8,7 +8,7 @@ user_input.add_argument("--user", "-U", help="User to sarch for.")
 option = user_input.parse_args()
 user = option.user
 
-if option.user is None:
+if not option.user:
     print "User must be specify"
     print user_input.format_usage()
 

@@ -9,7 +9,7 @@ user_input = argparse.ArgumentParser()
 user_input.add_argument('--git', '-G', help="path to git folder")
 option = user_input.parse_args()
 
-if option.git is None:
+if not option.git:
     print "Git path must be specify"
     print user_input.format_usage()
 

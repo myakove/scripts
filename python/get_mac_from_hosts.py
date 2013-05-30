@@ -9,7 +9,7 @@ user_input.add_argument('--host_file', '-H', help="File with hosts list, " +
                         "one host per line")
 option = user_input.parse_args()
 
-if option.interface or option.host_file is None:
+if not (option.interface and option.host_file):
     print "Interface and hosts file must be specify"
     print user_input.format_usage()
 

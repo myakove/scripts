@@ -8,7 +8,7 @@ user_input.add_argument("--host", "-H", help="File with hosts list, one " +
                         "host per line")
 option = user_input.parse_args()
 
-if option.host is None:
+if not option.host:
     print "Hosts file must be specify"
     print user_input.format_usage()
 

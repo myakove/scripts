@@ -41,7 +41,7 @@ def host_range():
                 print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
                       "\033[0m" % host
 
-if option.host is None:
+if not option.host:
     print "Host must be specify"
     print user_input.format_usage()
 
