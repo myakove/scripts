@@ -193,9 +193,10 @@ def OpenvpnConnect(username, password, conf_file):
                      "--auth-user-pass", pass_file], stdout=PIPE)
     out, err = openvpn.communicate()
     clean_tmp_file = Popen(["rm", "-rf", pass_file], stdout=None)
-    if err:
+    if IsServiceRunnig is False:
         print "Failed to connect to VPN server"
         return False
+    print "Connected to VPN"
     return True
 
 
