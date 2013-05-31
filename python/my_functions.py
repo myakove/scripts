@@ -177,7 +177,7 @@ def IsServiceRunnig(service):
     return False
 
 
-def OpenvpnConnect(username, password, conf_file):
+def OpenvpnConnect(password, conf_file):
     '''
     Description: Connect to openvpn server
     username = User to connect with
