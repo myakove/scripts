@@ -177,4 +177,24 @@ def IsServiceRunnig(service):
     return False
 
 
+def OpenvpnConnect(username, password, conf_file):
+    '''
+    Description: Connect to openvpn server
+    username = User to connect with
+    password = Password to connect with
+    conf_file = Configuration file to use
+    '''
+    tmp_file = "/tmp/.vpn"
+    tmp_file1 = Popen(["echo", username, ">", "/tmp/.vpn"], stdout=None)
+    tmp_file2 = Popen(["echo", password, ">>", "/tmp/.vpn"], stdout=None)
+    openvpn = Popen(["sudo", "openvpn", "--config", conf_file,
+                     "--auth-user-pass", tmp_file], stdout=PIPE)
+    out, err = openvpn.communicate()
+    clean_tmp_file = Popen(["rm", "-rf", tmp_file], stdout=None)
+    if err:
+        print "Failed to connect to VPN server"
+        return False
+    return True
+
+
 
