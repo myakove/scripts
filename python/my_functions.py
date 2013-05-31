@@ -172,7 +172,7 @@ def IsServiceRunnig(service):
     list_out = out.split("\n")
     if out:
         print "Service %s is running" % (service)
-        print "PID: %s" % (list_out)
+        print "PID: %s" % (list_out[:-1])
         return
     return False
 
