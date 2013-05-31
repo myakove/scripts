@@ -130,6 +130,10 @@ def apkRename(apk_path, apk):
 
 
 def ldapSearch(name):
+    '''
+    Description: Search for user in Redhat corp ldap server
+    user = User to search for.
+    '''
     search_string_uid = 'ldapsearch -x uid=*' + name + '*'
     search_string_cn = 'ldapsearch -x cn=*' + name + '*'
 
@@ -158,13 +162,19 @@ def ldapSearch(name):
     print '\n'
 
 
-def IsServiceRunnig(name):
-    cmd = Popen(["pgrep", name], stdout=PIPE)
+def IsServiceRunnig(service):
+    '''
+    Description: Check if service is running, retur PID of the service.
+    service = service to search for.
+    '''
+    cmd = Popen(["pgrep", service], stdout=PIPE)
     out, err = cmd.communicate()
+    list_out = out.split("\n")
     if out:
-        print "Service %s is running" % (name)
-        print "PID: %s" % (out)
-        return True
+        print "Service %s is running" % (service)
+        print "PID: %s" % (list_out)
+        return
     return False
+
 
 
