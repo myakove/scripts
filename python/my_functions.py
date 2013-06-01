@@ -184,20 +184,34 @@ def OpenvpnConnect(username, password, conf_file):
     password = Password to connect with
     conf_file = Configuration file to use
     '''
+    log_file = "/tmp/openvpn.log"
     pass_file = "/tmp/.vpn"
     tmp_file = open(pass_file, "w")
     tmp_file.write(username + "\n")
     tmp_file.write(password + "\n")
     tmp_file.close()
-    openvpn = Popen(["sudo", "openvpn", "--config", conf_file,
-                     "--auth-user-pass", pass_file], stdout=PIPE)
-    out, err = openvpn.communicate()
-    clean_tmp_file = Popen(["rm", "-rf", pass_file], stdout=None)
-    if IsServiceRunnig("openvpn") is False:
+    index = 0
+    if IsServiceRunnig("openvpn"):
+        print "Already connected to VPN server"
+        return False
+    else:
+        openvpn = Popen(["sudo", "openvpn", "--config", conf_file,
+                         "--auth-user-pass", pass_file, "--daemon",
+                         "--log", log_file], stdout=PIPE)
+        out, err = openvpn.communicate()
+        clean_tmp_file = Popen(["rm", "-rf", pass_file], stdout=None)
+        while index < 30:
+            interface = Popen(["ip", "add"], stdout=PIPE)
+            intout, interr = interface.communicate()
+            redhat0 = re.search("redhat0", intout)
+            if not redhat0:
+                index += 1
+                time.sleep(1)
+            else:
+                print "Connected to VPN"
+                return True
         print "Failed to connect to VPN server"
         return False
-    print "Connected to VPN"
-    return True
 
 
 
