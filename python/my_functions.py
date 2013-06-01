@@ -170,7 +170,7 @@ def IsServiceRunnig(service):
     cmd = Popen(["pgrep", service], stdout=PIPE)
     out, err = cmd.communicate()
     list_out = out.split("\n")
-    if err:
+    if not out:
         return False
     print "Service %s is running" % (service)
     print "PID: %s" % (list_out[:-1])
