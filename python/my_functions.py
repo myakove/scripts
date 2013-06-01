@@ -173,9 +173,9 @@ def IsServiceRunnig(service):
     list_out = out.split("\n")
     if not out:
         return False
-    print "Service %s is running" % (service)
-    print "PID: %s" % (list_out[:-1])
-    return True
+    #print "Service %s is running" % (service)
+    #print "PID: %s" % (list_out[:-1])
+    return list_out
 
 
 def OpenvpnConnect(username, password, conf_file):
