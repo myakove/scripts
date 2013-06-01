@@ -170,11 +170,11 @@ def IsServiceRunnig(service):
     cmd = Popen(["pgrep", service], stdout=PIPE)
     out, err = cmd.communicate()
     list_out = out.split("\n")
-    if out:
-        print "Service %s is running" % (service)
-        print "PID: %s" % (list_out[:-1])
-        return
-    return False
+    if err:
+        return False
+    print "Service %s is running" % (service)
+    print "PID: %s" % (list_out[:-1])
+    return True
 
 
 def OpenvpnConnect(username, password, conf_file):
