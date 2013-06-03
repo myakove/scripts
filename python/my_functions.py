@@ -80,12 +80,18 @@ def updateRepoAndInstall(version, hosts_file):
     repo_file.close()
 
     for host in host_target_list:
-        if os.system("pdsh -w " + host + " rpm -q pdsh"):
-            os.system("pdsh -w " + host + " -l root yum install pdsh -y")
-    os.system("pdcp -w " + host_target + " -l " + user + " " + tmp_file + " " +
-              repo_dir)
-    os.system("pdsh -w '^'" + hosts_file + " -l root yum clean all")
-    os.system("pdsh -w '^'" + hosts_file + " -l root yum update -y")
+        cmd_scp = Popen(["scp", tmp_file, user + "@" + host + ":" + repo_dir],
+                        stdout=PIPE)
+        out_scp, err_scp = cmd_scp.communicate()
+        if err_scp:
+            print "Failed to copy repo file to %s" % host
+    cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum", "clean", "all"],
+                      stdout=PIPE)
+    out_clean, err_clean = cmd_clean.communicate()
+    cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum", "update", "-y"],
+                       stdout=PIPE)
+    out_update, err_update = cmd_update.communicate()
+    print out_update
 
 
 def getMacAndIP(interface, host):
@@ -213,6 +219,18 @@ def OpenvpnConnect(username, password, conf_file):
                 return True
         print "Failed to connect to VPN server"
         return False
+
+
+def ActionOnRemoteHosts(username, hosts_file, command):
+    '''
+    Description: Run command on remote linux hosts
+    hosts_file = file with hosts to update, one host per line.
+    command - command to run on remote hosts.
+    username - user for ssh connection to remote host
+    '''
+    cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command], stdout=PIPE)
+    out, err = cmd.communicate()
+    print out
 
 
 
