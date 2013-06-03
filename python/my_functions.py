@@ -232,6 +232,7 @@ def ActionOnRemoteHosts(username, hosts_file, command):
     cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
                 stdout=PIPE)
     out, err = cmd.communicate()
+    print out
 
 
 
