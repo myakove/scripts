@@ -53,7 +53,8 @@ def hostAlive(host):
     Description: Check if remote host is alive using ssh
     host = host to connect to
     '''
-    if os.system("ssh -o ConnectTimeout=5 root@" + host + " exit &> /dev/null"):
+    if os.system("ssh -o ConnectTimeout=5 root@" + host +
+                 " exit &> /dev/null"):
         return True
 
 
@@ -85,11 +86,11 @@ def updateRepoAndInstall(version, hosts_file):
         out_scp, err_scp = cmd_scp.communicate()
         if err_scp:
             print "Failed to copy repo file to %s" % host
-    cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum", "clean", "all"],
-                      stdout=PIPE)
+    cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
+                       "clean", "all"], stdout=PIPE)
     out_clean, err_clean = cmd_clean.communicate()
-    cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum", "update", "-y"],
-                       stdout=PIPE)
+    cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
+                        "update", "-y"], stdout=PIPE)
     out_update, err_update = cmd_update.communicate()
     print out_update
 
@@ -228,9 +229,9 @@ def ActionOnRemoteHosts(username, hosts_file, command):
     command - command to run on remote hosts.
     username - user for ssh connection to remote host
     '''
-    cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command], stdout=PIPE)
+    cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
+                stdout=PIPE)
     out, err = cmd.communicate()
-    print out
 
 
 
