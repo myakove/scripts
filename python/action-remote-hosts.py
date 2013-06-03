@@ -9,7 +9,7 @@ user_input.add_argument("--hosts_file", "-H", help="hosts file, one host " +
 user_input.add_argument("--command", "-C", help="Command to run on remote " +
                         "hosts")
 user_input.add_argument("--user", "-U", help="User for remote hosts " +
-                        "connections (ssh)")
+                        "connections (ssh, default is root)")
 option = user_input.parse_args()
 
 if not option.hosts_file:
@@ -17,6 +17,8 @@ if not option.hosts_file:
     print user_input.format_usage()
 
 else:
-    my_functions.ActionOnRemoteHosts(option.user,
-                                     option.hosts_file,
-                                     option.command)
+    if option.user is None:
+        option.user = "root"
+        my_functions.ActionOnRemoteHosts(option.hosts_file,
+                                         option.command,
+                                         option.user)

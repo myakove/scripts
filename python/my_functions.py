@@ -222,7 +222,7 @@ def OpenvpnConnect(username, password, conf_file):
         return False
 
 
-def ActionOnRemoteHosts(username, hosts_file, command):
+def ActionOnRemoteHosts(hosts_file, command, username):
     '''
     Description: Run command on remote linux hosts
     hosts_file = file with hosts to update, one host per line.
