@@ -235,14 +235,21 @@ def ActionOnRemoteHosts(hosts_file, command, username):
     print out
 
 
-def FindInList(git_folder, list1, list2):
-    repo_list = []
+def FindInList(list1=[], list2=[]):
+    '''
+    Description: Search for items from list1 in list2, return status and new
+    list. status 0 mean that the new list is not empty and status 1 mean that
+    the new list is empty.
+    list1 = list to search from.
+    list2 = list to search in.
+    '''
+    new_list = []
     status = 1
     for val in list1:
         if val in list2:
-            repo_list.append(val)
+            new_list.append(val)
             status = 0
         else:
-            print "%s not found in %s folder" % (val, git_folder)
-            return status, repo_list
+            print "%s not found" % (val)
+    return status, new_list
 
