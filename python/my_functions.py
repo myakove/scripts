@@ -69,7 +69,6 @@ def updateRepoAndInstall(version, hosts_file):
     tmp_file = "/tmp/rhevm.repo"
     host_list = open(hosts_file, "r")
     host_target_list = [line.strip() for line in host_list]
-    host_target = ",".join(host_target_list)
 
     repo_file = open(tmp_file, "w")
     repo_file.write("[rhevm]" + "\n")
@@ -86,12 +85,15 @@ def updateRepoAndInstall(version, hosts_file):
         out_scp, err_scp = cmd_scp.communicate()
         if err_scp:
             print "Failed to copy repo file to %s" % host
+            return False
+
     cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
                        "clean", "all"], stdout=PIPE)
     out_clean, err_clean = cmd_clean.communicate()
     cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
                         "update", "-y"], stdout=PIPE)
     out_update, err_update = cmd_update.communicate()
+    print "Updateing host to %s" % version
     print out_update
 
 
