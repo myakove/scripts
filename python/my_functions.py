@@ -6,6 +6,7 @@ import user
 import time
 from subprocess import Popen, PIPE
 from commands import getoutput
+import yum
 
 
 def autoSSH(host):
@@ -231,6 +232,11 @@ def ActionOnRemoteHosts(hosts_file, command, username):
     command - command to run on remote hosts.
     username - user for ssh connection to remote host
     '''
+    yb = yum.YumBase().isPackageInstalled("pdsh")
+    if not yb:
+        print "pdsh is not installed"
+        return False
+
     cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
                 stdout=PIPE)
     out, err = cmd.communicate()
