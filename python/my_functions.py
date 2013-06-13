@@ -65,6 +65,11 @@ def updateRepoAndInstall(version, hosts_file):
     version = build version to update to.
     hosts_file = file with hosts to update, one host per line.
     '''
+    yb = yum.YumBase().isPackageInstalled("pdsh")
+    if not yb:
+        print "pdsh is not installed"
+        return False
+
     user = "root"
     repo_dir = "/etc/yum.repos.d/"
     tmp_file = "/tmp/rhevm.repo"
@@ -121,6 +126,12 @@ def apkRename(apk_path, apk):
     Description: Rename apk to valid name.
     apk = apk file to rename
     '''
+    try:
+        Popen(["aapt"]).communicate()
+    except OSError:
+        print "Cannot find aapt binary"
+        return False
+
     cmd = Popen(("aapt  d  badging " + apk),
                 shell=True,
                 stdin=PIPE, stdout=PIPE, close_fds=True)
