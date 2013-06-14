@@ -15,16 +15,16 @@ user_input.add_argument("--view", "-V", help="Jenkins view")
 user_input.add_argument("--nview", "-NV", help="Nested Jenkins view")
 option = user_input.parse_args()
 
-j = Jenkins(baseurl=option.server,
-            username=option.username,
-            password=option.password)
-
 if not (option.server and
         option.action and
         option.view and
         option.nview):
     print "Server, search, action, view, nview must be specify"
     print user_input.format_usage()
+
+j = Jenkins(baseurl=option.server,
+            username=option.username,
+            password=option.password)
 
 view = j.get_view(option.view)
 nested_view = view.get_nested_view_dict()
