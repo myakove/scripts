@@ -15,6 +15,12 @@ def autoSSH(host):
     ssh-copy-id to remote host to enable ssh connect without password
     host = host to connect to
     '''
+    yb = yum.YumBase().isPackageInstalled("sshpass")
+
+    if not yb:
+        print "sshpass is not installed"
+        return False
+
     home = user.home
     ssh_dir = ".ssh"
     ssh_file = "known_hosts"
