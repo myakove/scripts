@@ -13,7 +13,7 @@ if not option.host_file:
     print user_input.format_usage()
 
 else:
-    hosts_file = open(option.hosts_file, "r")
+    hosts_file = open(option.host_file, "r")
     for host in file.readlines(hosts_file):
         my_functions.autoSSH(host)
 
