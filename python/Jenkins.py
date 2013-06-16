@@ -19,18 +19,8 @@ user_input.add_argument("--nview", "-NV", help="Nested Jenkins view")
 option = user_input.parse_args()
 
 
-JENKINS_URL = 'http://jenkins.qa.lab.tlv.redhat.com:8080'
-JENKINS_USER = 'qe_automation'
-JENKINS_PASSWD = '123456'
-
-if not option.server:
-    option.server = JENKINS_URL
-if not option.username:
-    option.username = JENKINS_USER
-if not option.password:
-    option.password = JENKINS_PASSWD
-
-if not (option.action and
+if not (option.server and
+        option.action and
         option.view and
         option.nview):
     print "Server, search, action, view, nview must be specify"
