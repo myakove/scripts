@@ -21,38 +21,39 @@ def autoSSH(host):
         print "sshpass is not installed"
         return False
 
-    home = user.home
-    ssh_dir = ".ssh"
-    ssh_file = "known_hosts"
-    ssh_path = home + '/' + ssh_dir + '/' + ssh_file
-    know_host = open(ssh_path, "r")
+    else:
+        home = user.home
+        ssh_dir = ".ssh"
+        ssh_file = "known_hosts"
+        ssh_path = home + '/' + ssh_dir + '/' + ssh_file
+        know_host = open(ssh_path, "r")
 
-    for line in file.readlines(know_host):
-        host_ip = Popen(["host", host], stdout=PIPE)
-        out_host_ip, err_host_ip = host_ip.communicate()
-        host_ip_addr = out_host_ip.split()
-        if re.search(host, line):
-            Popen(["ssh-keygen", "-R", host], stdout=PIPE)
-        if re.search(host_ip_addr[3], line):
-            Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
+        for line in file.readlines(know_host):
+            host_ip = Popen(["host", host], stdout=PIPE)
+            out_host_ip, err_host_ip = host_ip.communicate()
+            host_ip_addr = out_host_ip.split()
+            if re.search(host, line):
+                Popen(["ssh-keygen", "-R", host], stdout=PIPE)
+            if re.search(host_ip_addr[3], line):
+                Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
 
-    host_key = Popen(["ssh-keyscan", "-T", "5", host], stdout=PIPE)
-    host_key_out, host_key_err = host_key.communicate()
+        host_key = Popen(["ssh-keyscan", "-T", "5", host], stdout=PIPE)
+        host_key_out, host_key_err = host_key.communicate()
 
-    if host_key_err:
-        print "\033[0;33m" + "No ssh keys from %s" % host + "\033[0m"
-        return False
+        if host_key_err:
+            print "\033[0;33m" + "No ssh keys from %s" % host + "\033[0m"
+            return False
 
-    if host_key_out:
-        echo_cmd = 'echo " ' + host_key_out + '" >> ' + ssh_path
-        Popen([echo_cmd], stdout=PIPE, shell=True)
+        if host_key_out:
+            echo_cmd = 'echo " ' + host_key_out + '" >> ' + ssh_path
+            Popen([echo_cmd], stdout=PIPE, shell=True)
 
-    host_key_copy_err = Popen(["sshpass", "-p", "qum5net", "ssh-copy-id",
-                               "root@" + host], stdout=PIPE).communicate()[1]
+        host_key_copy_err = Popen(["sshpass", "-p", "qum5net", "ssh-copy-id",
+                                   "root@" + host], stdout=PIPE).communicate()[1]
 
-    if host_key_copy_err:
-        print "\033[0;32m" + "Couldn't connect to %s" % host + "\033[0m"
-    return True
+        if host_key_copy_err:
+            print "\033[0;32m" + "Couldn't connect to %s" % host + "\033[0m"
+        return True
 
 
 def hostAlive(host):
@@ -76,37 +77,38 @@ def updateRepoAndInstall(version, hosts_file):
         print "pdsh is not installed"
         return False
 
-    user = "root"
-    repo_dir = "/etc/yum.repos.d/"
-    tmp_file = "/tmp/rhevm.repo"
-    host_list = open(hosts_file, "r")
-    host_target_list = [line.strip() for line in host_list]
+    else:
+        user = "root"
+        repo_dir = "/etc/yum.repos.d/"
+        tmp_file = "/tmp/rhevm.repo"
+        host_list = open(hosts_file, "r")
+        host_target_list = [line.strip() for line in host_list]
 
-    repo_file = open(tmp_file, "w")
-    repo_file.write("[rhevm]" + "\n")
-    repo_file.write("name=RHEVM" + "\n")
-    repo_file.write("baseurl=http://bob.eng.lab.tlv.redhat.com/builds/" +
-                    version + "\n")
-    repo_file.write("gpgcheck=0" + "\n")
-    repo_file.write("enable=1" + "\n")
-    repo_file.close()
+        repo_file = open(tmp_file, "w")
+        repo_file.write("[rhevm]" + "\n")
+        repo_file.write("name=RHEVM" + "\n")
+        repo_file.write("baseurl=http://bob.eng.lab.tlv.redhat.com/builds/" +
+                        version + "\n")
+        repo_file.write("gpgcheck=0" + "\n")
+        repo_file.write("enable=1" + "\n")
+        repo_file.close()
 
-    for host in host_target_list:
-        cmd_scp = Popen(["scp", tmp_file, user + "@" + host + ":" + repo_dir],
-                        stdout=PIPE)
-        out_scp, err_scp = cmd_scp.communicate()
-        if err_scp:
-            print "Failed to copy repo file to %s" % host
-            return False
+        for host in host_target_list:
+            cmd_scp = Popen(["scp", tmp_file, user + "@" + host + ":" + repo_dir],
+                            stdout=PIPE)
+            out_scp, err_scp = cmd_scp.communicate()
+            if err_scp:
+                print "Failed to copy repo file to %s" % host
+                return False
 
-    cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
-                       "clean", "all"], stdout=PIPE)
-    out_clean, err_clean = cmd_clean.communicate()
-    cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
-                        "update", "-y"], stdout=PIPE)
-    out_update, err_update = cmd_update.communicate()
-    print "Updateing host to %s" % version
-    print out_update
+        cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
+                           "clean", "all"], stdout=PIPE)
+        out_clean, err_clean = cmd_clean.communicate()
+        cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
+                            "update", "-y"], stdout=PIPE)
+        out_update, err_update = cmd_update.communicate()
+        print "Updateing host to %s" % version
+        print out_update
 
 
 def getMacAndIP(interface, host):
@@ -222,6 +224,7 @@ def OpenvpnConnect(username, password, conf_file):
     if IsServiceRunnig("openvpn"):
         print "Already connected to VPN server"
         return False
+
     else:
         openvpn = Popen(["sudo", "openvpn", "--config", conf_file,
                          "--auth-user-pass", pass_file, "--daemon",
@@ -254,10 +257,11 @@ def ActionOnRemoteHosts(hosts_file, command, username):
         print "pdsh is not installed"
         return False
 
-    cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
-                stdout=PIPE)
-    out, err = cmd.communicate()
-    print out
+    else:
+        cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
+                    stdout=PIPE)
+        out, err = cmd.communicate()
+        print out
 
 
 def FindInList(list1=[], list2=[]):

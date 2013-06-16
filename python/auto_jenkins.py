@@ -22,20 +22,30 @@ if not (option.server and
     print "Server, search, action, view, nview must be specify"
     print user_input.format_usage()
 
-j = Jenkins(baseurl=option.server,
-            username=option.username,
-            password=option.password)
+else:
+    j = Jenkins(baseurl=option.server,
+                username=option.username,
+                password=option.password)
 
-view = j.get_view(option.view)
-nested_view = view.get_nested_view_dict()
-view_url = nested_view.get(option.nview)
-view_by_url = j.get_view_by_url(view_url)
-jobs_dict = view_by_url.get_job_dict().keys()
+    view = j.get_view(option.view)
+    nested_view = view.get_nested_view_dict()
+    view_url = nested_view.get(option.nview)
+    view_by_url = j.get_view_by_url(view_url)
+    jobs_dict = view_by_url.get_job_dict().keys()
 
-for job in jobs_dict:
-    active_job = j.get_job(job)
-    if option.search:
-        if option.search in job:
+    for job in jobs_dict:
+        active_job = j.get_job(job)
+        if option.search:
+            if option.search in job:
+                if option.action == "enable":
+                    active_job.enable()
+                    print job, "enabled"
+                if option.action == "disable":
+                    active_job.disable()
+                    print job, "disabled"
+                if option.action == "print":
+                    print active_job.name
+        else:
             if option.action == "enable":
                 active_job.enable()
                 print job, "enabled"
@@ -44,15 +54,6 @@ for job in jobs_dict:
                 print job, "disabled"
             if option.action == "print":
                 print active_job.name
-    else:
-        if option.action == "enable":
-            active_job.enable()
-            print job, "enabled"
-        if option.action == "disable":
-            active_job.disable()
-            print job, "disabled"
-        if option.action == "print":
-            print active_job.name
 
 
 
