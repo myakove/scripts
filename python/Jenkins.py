@@ -23,7 +23,7 @@ if not (option.server and
         option.action and
         option.view and
         option.nview):
-    print "Server, search, action, view, nview must be specify"
+    print "Server, search, action, view and nview must be specify"
     print user_input.format_usage()
 
 else:

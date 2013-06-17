@@ -14,12 +14,13 @@ def autoSSH(host):
     ssh-copy-id to remote host to enable ssh connect without password
     host = host to connect to
     '''
+    yb = True
     try:
         import yum
+        yb = yum.YumBase().isPackageInstalled("sshpass")
     except ImportError:
         print "If this script fails check if sshpass in installed"
-
-    yb = yum.YumBase().isPackageInstalled("sshpass")
+        pass
 
     if not yb:
         print "sshpass is not installed"
@@ -76,12 +77,14 @@ def updateRepoAndInstall(version, hosts_file):
     version = build version to update to.
     hosts_file = file with hosts to update, one host per line.
     '''
+    yb = True
     try:
         import yum
+        yb = yum.YumBase().isPackageInstalled("sshpass")
     except ImportError:
         print "If this script fails check if pdsh in installed"
+        pass
 
-    yb = yum.YumBase().isPackageInstalled("pdsh")
     if not yb:
         print "pdsh is not installed"
         return False
@@ -261,7 +264,14 @@ def ActionOnRemoteHosts(hosts_file, command, username):
     command - command to run on remote hosts.
     username - user for ssh connection to remote host
     '''
-    yb = yum.YumBase().isPackageInstalled("pdsh")
+    yb = True
+    try:
+        import yum
+        yb = yum.YumBase().isPackageInstalled("pdsh")
+    except ImportError:
+        print "If this script fails check if pdsh in installed"
+        pass
+
     if not yb:
         print "pdsh is not installed"
         return False
