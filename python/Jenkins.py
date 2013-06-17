@@ -30,9 +30,6 @@ else:
     j = JenkinsAPI(baseurl=option.server,
                    username=option.username,
                    password=option.password)
-    jp = JenkinsPython(option.server,
-                       option.username,
-                       option.password)
 
     view = j.get_view(option.view)
     nested_view = view.get_nested_view_dict()
@@ -42,7 +39,6 @@ else:
 
     for job in jobs_dict:
         active_job = j.get_job(job)
-        active_job_url = get_build_triggerurl()[0]
         if option.search:
             if option.search in job:
                 if option.action == "enable":
@@ -60,7 +56,8 @@ else:
                 if option.action == "info":
                     active_job.print_data()
                 if option.action == "delete":
-                    j.delete_job(active_job)
+                    j.delete_job(active_job.name)
+                    print active_job.name, "Deleted"
 
         else:
             if option.action == "enable":
@@ -78,4 +75,5 @@ else:
             if option.action == "info":
                     active_job.print_data()
             if option.action == "delete":
-                j.delete_job(active_job)
+                j.delete_job(active_job.name)
+                print active_job.name, "Deleted"
