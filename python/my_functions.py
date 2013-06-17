@@ -6,7 +6,6 @@ import user
 import time
 from subprocess import Popen, PIPE
 from commands import getoutput
-import yum
 
 
 def autoSSH(host):
@@ -15,6 +14,11 @@ def autoSSH(host):
     ssh-copy-id to remote host to enable ssh connect without password
     host = host to connect to
     '''
+    try:
+        import yum
+    except ImportError:
+        print "If this script fails check if sshpass in installed"
+
     yb = yum.YumBase().isPackageInstalled("sshpass")
 
     if not yb:
@@ -72,6 +76,11 @@ def updateRepoAndInstall(version, hosts_file):
     version = build version to update to.
     hosts_file = file with hosts to update, one host per line.
     '''
+    try:
+        import yum
+    except ImportError:
+        print "If this script fails check if pdsh in installed"
+
     yb = yum.YumBase().isPackageInstalled("pdsh")
     if not yb:
         print "pdsh is not installed"
