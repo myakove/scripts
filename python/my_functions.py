@@ -4,9 +4,9 @@ import re
 import os
 import user
 import time
+import logging
 from subprocess import Popen, PIPE
 from commands import getoutput
-from jenkinsapi.jenkins import Jenkins as JenkinsAPI
 
 
 def autoSSH(host):
@@ -20,7 +20,7 @@ def autoSSH(host):
         import yum
         yb = yum.YumBase().isPackageInstalled("sshpass")
     except ImportError:
-        print "If this script fails check if sshpass in installed"
+        logging.info("If this script fails check if sshpass in installed")
         pass
 
     if not yb:
@@ -83,7 +83,7 @@ def updateRepoAndInstall(version, hosts_file):
         import yum
         yb = yum.YumBase().isPackageInstalled("sshpass")
     except ImportError:
-        print "If this script fails check if pdsh in installed"
+        logging.info("If this script fails check if pdsh in installed")
         pass
 
     if not yb:
@@ -150,7 +150,7 @@ def apkRename(apk_path, apk):
     try:
         Popen(["aapt"]).communicate()
     except OSError:
-        print "Cannot find aapt binary"
+        logging.error("Cannot find aapt binary")
         return False
 
     cmd = Popen(("aapt  d  badging " + apk),
@@ -270,7 +270,7 @@ def ActionOnRemoteHosts(hosts_file, command, username):
         import yum
         yb = yum.YumBase().isPackageInstalled("pdsh")
     except ImportError:
-        print "If this script fails check if pdsh in installed"
+        logging.info("If this script fails check if pdsh in installed")
         pass
 
     if not yb:
@@ -316,7 +316,14 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
     password = password for Jenkins server
     search = search for job name or part of the name
     '''
-    j = JenkinsAPI(baseurl=server, username=username, password=password)
+    try:
+        from jenkinsapi.jenkins import Jenkins
+    except ImportError:
+        logging.error("jenkinsapi is not installed, please install it using: "
+                      "pip install jenkinsapi")
+        return False
+
+    j = Jenkins(baseurl=server, username=username, password=password)
 
     view = j.get_view(view)
     nested_view = view.get_nested_view_dict()

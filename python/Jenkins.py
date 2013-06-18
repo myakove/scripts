@@ -2,7 +2,6 @@
 
 import argparse
 import my_functions
-from jenkinsapi.jenkins import Jenkins as JenkinsAPI
 
 user_input = argparse.ArgumentParser()
 user_input.add_argument("--server", "-SRV", help="Jenkins server")
