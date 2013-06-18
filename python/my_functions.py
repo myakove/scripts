@@ -9,11 +9,11 @@ from subprocess import Popen, PIPE
 from commands import getoutput
 
 
-def autoSSH(host):
+def autoSSH(host, username, password):
     '''
     Description: Get remote host ssh key and add it to local know_hosts file
     ssh-copy-id to remote host to enable ssh connect without password
-    host = host to connect to
+    host = host to connect to format: user@host
     '''
     yb = True
     try:
@@ -54,8 +54,9 @@ def autoSSH(host):
             echo_cmd = 'echo " ' + host_key_out + '" >> ' + ssh_path
             Popen([echo_cmd], stdout=PIPE, shell=True)
 
-        host_key_copy_err = Popen(["sshpass", "-p", "qum5net", "ssh-copy-id",
-                                   "root@" + host], stdout=PIPE).communicate()[1]
+        host_key_copy_err = Popen(["sshpass", "-p", password, "ssh-copy-id",
+                                   username + "@" + host],
+                                  stdout=PIPE).communicate()[1]
 
         if host_key_copy_err:
             print "\033[0;32m" + "Couldn't connect to %s" % host + "\033[0m"
@@ -107,7 +108,8 @@ def updateRepoAndInstall(version, hosts_file):
         repo_file.close()
 
         for host in host_target_list:
-            cmd_scp = Popen(["scp", tmp_file, user + "@" + host + ":" + repo_dir],
+            cmd_scp = Popen(["scp", tmp_file, user + "@" + host + ":" +
+                             repo_dir],
                             stdout=PIPE)
             out_scp, err_scp = cmd_scp.communicate()
             if err_scp:
@@ -117,8 +119,8 @@ def updateRepoAndInstall(version, hosts_file):
         cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
                            "clean", "all"], stdout=PIPE)
         out_clean, err_clean = cmd_clean.communicate()
-        cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
-                            "update", "-y"], stdout=PIPE)
+        cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root",
+                            "yum", "update", "-y"], stdout=PIPE)
         out_update, err_update = cmd_update.communicate()
         print "Updateing host to %s" % version
         print out_update
