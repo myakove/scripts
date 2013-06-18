@@ -32,12 +32,11 @@ def autoSSH(host, username, password):
         ssh_dir = ".ssh"
         ssh_file = "known_hosts"
         ssh_path = home + '/' + ssh_dir + '/' + ssh_file
-        know_host = open(ssh_path, "r")
+        know_host = open(ssh_path, "r").read().split()
 
-        for line in file.readlines(know_host):
-            host_ip = Popen(["host", host], stdout=PIPE)
-            out_host_ip, err_host_ip = host_ip.communicate()
-            host_ip_addr = out_host_ip.split()
+        for line in know_host:
+            host_ip = Popen(["host", host], stdout=PIPE).communicate()[0]
+            host_ip_addr = host_ip.split()
             if re.search(host, line):
                 Popen(["ssh-keygen", "-R", host], stdout=PIPE)
             if re.search(host_ip_addr[3], line):
