@@ -6,6 +6,7 @@ import user
 import time
 from subprocess import Popen, PIPE
 from commands import getoutput
+from jenkinsapi.jenkins import Jenkins as JenkinsAPI
 
 
 def autoSSH(host):
@@ -300,4 +301,67 @@ def FindInList(list1=[], list2=[]):
         else:
             print "%s not found" % (val)
     return status, new_list
+
+
+def jenkinsCMD(server, action, view, nview, username=None, password=None,
+               search=None):
+    '''
+    Description: Run action on Jenkins jobs (build, delete, disable, enable,
+    get info and print job name)
+    server = Jenkins server
+    action = action for the job (build, delete, disable, enable, info, print)
+    view = view in jenkins (tab)
+    nview = nested view in jenkins (under view tab)
+    username = username for Jenkins server
+    password = password for Jenkins server
+    search = search for job name or part of the name
+    '''
+    j = JenkinsAPI(baseurl=server, username=username, password=password)
+
+    view = j.get_view(view)
+    nested_view = view.get_nested_view_dict()
+    view_url = nested_view.get(nview)
+    view_by_url = j.get_view_by_url(view_url)
+    jobs_dict = view_by_url.get_job_dict().keys()
+
+    for job in jobs_dict:
+        active_job = j.get_job(job)
+        if search:
+            if search in job:
+                if action == "enable":
+                    active_job.enable()
+                    print job, "enabled"
+                if action == "disable":
+                    active_job.disable()
+                    print job, "disabled"
+                if action == "print":
+                    print active_job.name
+                if action == "build":
+                    active_job.post_data(active_job.get_build_triggerurl()[0],
+                                         "build")
+                    print active_job.name, "building"
+                if action == "info":
+                    active_job.print_data()
+                if action == "delete":
+                    j.delete_job(active_job.name)
+                    print active_job.name, "Deleted"
+
+        else:
+            if action == "enable":
+                active_job.enable()
+                print job, "enabled"
+            if action == "disable":
+                active_job.disable()
+                print job, "disabled"
+            if action == "print":
+                print active_job.name
+            if action == "build":
+                active_job.post_data(active_job.get_build_triggerurl()[0],
+                                     "build")
+                print active_job.name, "building"
+            if action == "info":
+                    active_job.print_data()
+            if action == "delete":
+                j.delete_job(active_job.name)
+                print active_job.name, "Deleted"
 
