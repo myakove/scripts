@@ -37,11 +37,16 @@ def autoSSH(host, username, password):
         for line in know_host:
             host_ip = Popen(["host", host], stdout=PIPE).communicate()[0]
             host_ip_addr = host_ip.split()
+            if host in line:
+                Popen(["ssh-keygen", "-R", host], stdout=PIPE)
+            if host_ip_addr[3] in line:
+                Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
+            '''
             if re.search(host, line):
                 Popen(["ssh-keygen", "-R", host], stdout=PIPE)
             if re.search(host_ip_addr[3], line):
                 Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
-
+            '''
         host_key = Popen(["ssh-keyscan", "-T", "5", host], stdout=PIPE)
         host_key_out, host_key_err = host_key.communicate()
 

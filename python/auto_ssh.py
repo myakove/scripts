@@ -60,7 +60,8 @@ def validateArgumantsAndRun():
         else:
             hosts_file = open(option.file, "r")
             for host in file.readlines(hosts_file):
-                cmd = my_functions.autoSSH(host, option.username,
+                ssh_host = host.strip()
+                cmd = my_functions.autoSSH(ssh_host, option.username,
                                            option.password)
                 if not cmd:
                     print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
