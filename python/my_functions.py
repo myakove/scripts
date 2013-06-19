@@ -353,6 +353,9 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
                 if action == "delete":
                     j.delete_job(active_job.name)
                     print active_job.name, "Deleted"
+                if action == "is_queued":
+                    queued = active_job.is_queued()
+                    print active_job.name, "queued: ", queued
 
         else:
             if action == "enable":
@@ -372,4 +375,7 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
             if action == "delete":
                 j.delete_job(active_job.name)
                 print active_job.name, "Deleted"
+            if action == "is_queued":
+                queued = active_job.is_queued()
+                print active_job.name, "queued: ", queued
 

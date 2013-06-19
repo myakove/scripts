@@ -8,8 +8,8 @@ user_input.add_argument("--server", "-SRV", help="Jenkins server")
 user_input.add_argument("--username", "-U", help="Username for Jenkins server")
 user_input.add_argument("--password", "-P", help="Password got Jenkins server")
 user_input.add_argument("--action", "-A", help="action to run on the job,"
-                        "enable, disable, print (name), delete, info and "
-                        "build")
+                        "enable, disable, print (name), delete, info, "
+                        "is_queued and build")
 user_input.add_argument("--search", "-S", help="search for job to apply the"
                         "action")
 user_input.add_argument("--view", "-V", help="Jenkins view")
