@@ -7,8 +7,7 @@ user_input = argparse.ArgumentParser()
 user_input.add_argument("--host", "-H", help="Host to connect to (host name " +
                         "without domain, if using range host name is " +
                         "without the number)")
-user_input.add_argument("--domain", "-D", default="qa.lab.tlv.redhat.com",
-                        help="Domain for the host")
+user_input.add_argument("--domain", "-D", help="Domain for the host")
 user_input.add_argument("--range", "-R", help="To run on range of hosts, " +
                         "example: 1-10 or 01-10")
 user_input.add_argument("--username", "-U", default="root", help="user to " +
@@ -51,21 +50,15 @@ def validateArgumantsAndRun():
         print "password must be specify"
         print user_input.format_usage()
         return False
+
     if option.file:
-        if option.host:
-            print "file can only be sent with --user"
+        if (option.host or option.domain or option.range):
+            print "file can only be sent with --user and --password"
             print user_input.format_usage()
             return False
-        if option.domain:
-            print "file can only be sent with --user"
-            print user_input.format_usage()
-            return False
-        if option.range:
-            print "file can only be sent with --user"
-            print user_input.format_usage()
-            return False
+
         else:
-            hosts_file = open(option.host_file, "r")
+            hosts_file = open(option.file, "r")
             for host in file.readlines(hosts_file):
                 cmd = my_functions.autoSSH(host, option.username,
                                            option.password)
@@ -78,15 +71,6 @@ def validateArgumantsAndRun():
         print "Host or file must be specify"
         print user_input.format_usage()
         return False
-
-    if option.file:
-        hosts_file = open(option.host_file, "r")
-        for host in file.readlines(hosts_file):
-            cmd = my_functions.autoSSH(host, option.username, option.password)
-            if not cmd:
-                print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
-                      "\033[0m" % host
-        return True
 
     if option.range:
         sshHostRange()
