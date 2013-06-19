@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import my_functions
+import threading
 import argparse
 
 user_input = argparse.ArgumentParser()
@@ -32,17 +33,19 @@ def sshHostRange():
             i = '0' + str(i)
             host = option.user + "@" + option.host + str(i) + "." + \
                 option.domain
-            cmd = my_functions.autoSSH(host, option.username, option.password)
-            if not cmd:
-                print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
-                      "\033[0m" % host
+            T = threading.Thread(target=my_functions.autoSSH,
+                                 args=(host,
+                                 option.username,
+                                 option.password))
+            T.start()
         else:
             host = option.user + "@" + option.host + str(i) + "." + \
                 option.domain
-            cmd = my_functions.autoSSH(host, option.username, option.password)
-            if not cmd:
-                print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
-                      "\033[0m" % host
+            T = threading.Thread(target=my_functions.autoSSH,
+                                 args=(host,
+                                       option.username,
+                                       option.password))
+            T.start()
 
 
 def validateArgumantsAndRun():
@@ -58,14 +61,14 @@ def validateArgumantsAndRun():
             return False
 
         else:
-            hosts_file = open(option.file, "r")
-            for host in file.readlines(hosts_file):
+            hosts_file = open(option.file, "r").readlines()
+            for host in hosts_file:
                 ssh_host = host.strip()
-                cmd = my_functions.autoSSH(ssh_host, option.username,
-                                           option.password)
-                if not cmd:
-                    print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
-                          "\033[0m" % host
+                T = threading.Thread(target=my_functions.autoSSH,
+                                     args=(ssh_host,
+                                           option.username,
+                                           option.password))
+                T.start()
             return True
 
     if not option.host:

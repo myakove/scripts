@@ -32,7 +32,7 @@ def autoSSH(host, username, password):
         ssh_dir = ".ssh"
         ssh_file = "known_hosts"
         ssh_path = home + '/' + ssh_dir + '/' + ssh_file
-        know_host = open(ssh_path, "r").read()
+        know_host = open(ssh_path, "r").readlines()
 
         for line in know_host:
             host_ip = Popen(["host", host], stdout=PIPE).communicate()[0]
