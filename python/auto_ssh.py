@@ -36,7 +36,7 @@ def sshHostRange():
             host = option.user + "@" + option.host + str(i) + "." + \
                 option.domain
             process = multiprocessing.Process(target=my_functions.autoSSH,
-                                              args=(ssh_host,
+                                              args=(host,
                                               option.username,
                                               option.password))
             range_jobs.append(process)
@@ -47,7 +47,7 @@ def sshHostRange():
             host = option.user + "@" + option.host + str(i) + "." + \
                 option.domain
             process = multiprocessing.Process(target=my_functions.autoSSH,
-                                              args=(ssh_host,
+                                              args=(host,
                                               option.username,
                                               option.password))
             range_jobs.append(process)
@@ -103,8 +103,8 @@ def validateArgumantsAndRun():
                                    option.username,
                                    option.password)
         if not cmd:
-                print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
-                      "\033[0m" % host
+                print "\033[0;32m" + "Fail to configure auto ssh to %s"\
+                      % option.host + "\033[0m"
                 return False
 
 validateArgumantsAndRun()

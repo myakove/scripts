@@ -34,36 +34,35 @@ def autoSSH(host, username, password):
         ssh_path = home + '/' + ssh_dir + '/' + ssh_file
         know_host = open(ssh_path, "r").readlines()
 
+        host_ip = Popen(["host", host], stdout=PIPE).communicate()[0]
+        host_ip_addr = host_ip.split()
+
         for line in know_host:
-            host_ip = Popen(["host", host], stdout=PIPE).communicate()[0]
-            host_ip_addr = host_ip.split()
             if host in line:
                 Popen(["ssh-keygen", "-R", host], stdout=PIPE)
             if host_ip_addr[3] in line:
                 Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
-            '''
-            if re.search(host, line):
-                Popen(["ssh-keygen", "-R", host], stdout=PIPE)
-            if re.search(host_ip_addr[3], line):
-                Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
-            '''
-        host_key = Popen(["ssh-keyscan", "-T", "5", host], stdout=PIPE)
-        host_key_out, host_key_err = host_key.communicate()
 
-        if host_key_err:
+        host_key = Popen(["ssh-keyscan", "-T", "5", host],
+                         stdout=PIPE).communicate()[0]
+
+        if host_key == "":
             print "\033[0;33m" + "No ssh keys from %s" % host + "\033[0m"
             return False
 
-        if host_key_out:
-            echo_cmd = 'echo " ' + host_key_out + '" >> ' + ssh_path
+        else:
+            echo_cmd = 'echo " ' + host_key + '" >> ' + ssh_path
             Popen([echo_cmd], stdout=PIPE, shell=True)
 
+        import pdb
+        pdb.set_trace()
         host_key_copy_err = Popen(["sshpass", "-p", password, "ssh-copy-id",
                                    username + "@" + host],
                                   stdout=PIPE).communicate()[1]
 
         if host_key_copy_err:
             print "\033[0;32m" + "Couldn't connect to %s" % host + "\033[0m"
+            return False
         return True
 
 
