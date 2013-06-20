@@ -22,41 +22,26 @@ user_input.add_argument("--file", "-F", help="File with hosts list, " +
 option = user_input.parse_args()
 
 
-def sshHostRange():
-    flag_zero = False
-    if option.range[0] == "0":
-        flag_zero = True
-    host_range = option.range.split("-")
-    start_range = int(host_range[0])
-    end_range = int(host_range[1])
+def sshHostRange(username, password, host, domain, host_range=[]):
     range_jobs = []
-    for i in range(start_range, end_range + 1):
-        if flag_zero and i < 10:
-            i = '0' + str(i)
-            host = option.user + "@" + option.host + str(i) + "." + \
-                option.domain
-            process = multiprocessing.Process(target=my_functions.autoSSH,
-                                              args=(host,
-                                              option.username,
-                                              option.password))
-            range_jobs.append(process)
-            process.start()
-            time.sleep(1)
+    for i in range(int(host_range[0]), int(host_range[1]) + 1):
+        if '0' in (host_range[0] and host_range[1]):
+            if i >= 10:
+                idx = i
+            else:
+                idx = "0%d" % i
+        active_host = "".join([host, str(idx), ".", domain])
+        process = multiprocessing.Process(target=my_functions.autoSSH,
+                                          args=(active_host,
+                                          username,
+                                          password))
+        range_jobs.append(process)
+        process.start()
+        time.sleep(1)
 
-        else:
-            host = option.user + "@" + option.host + str(i) + "." + \
-                option.domain
-            process = multiprocessing.Process(target=my_functions.autoSSH,
-                                              args=(host,
-                                              option.username,
-                                              option.password))
-            range_jobs.append(process)
-            process.start()
-            time.sleep(1)
-
-    for j in jobs:
-            j.join()
-            print "\033[0;32m", jobs, "\033[0m"
+    for j in range_jobs:
+        j.join()
+        print "\033[0;32m", range_jobs, "\033[0m"
 
 
 def validateArgumantsAndRun():
@@ -95,7 +80,12 @@ def validateArgumantsAndRun():
         return False
 
     if option.range:
-        sshHostRange()
+        HOST_RANGE = option.range.split("-")
+        sshHostRange(option.username,
+                     option.password,
+                     option.host,
+                     option.domain,
+                     HOST_RANGE,)
         return True
 
     else:

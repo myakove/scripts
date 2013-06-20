@@ -54,16 +54,9 @@ def autoSSH(host, username, password):
             echo_cmd = 'echo " ' + host_key + '" >> ' + ssh_path
             Popen([echo_cmd], stdout=PIPE, shell=True)
 
-        import pdb
-        pdb.set_trace()
-        host_key_copy_err = Popen(["sshpass", "-p", password, "ssh-copy-id",
-                                   username + "@" + host],
-                                  stdout=PIPE).communicate()[1]
-
-        if host_key_copy_err:
-            print "\033[0;32m" + "Couldn't connect to %s" % host + "\033[0m"
-            return False
-        return True
+        Popen(["sshpass", "-p", password, "ssh-copy-id",
+               username + "@" + host], stdout=PIPE).communicate()[0]
+    return True
 
 
 def hostAlive(host):
@@ -261,6 +254,7 @@ def OpenvpnConnect(username, password, conf_file):
                 return True
         print "Failed to connect to VPN server"
         return False
+    return True
 
 
 def ActionOnRemoteHosts(hosts_file, command, username):
