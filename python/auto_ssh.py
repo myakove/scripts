@@ -1,8 +1,9 @@
 #! /usr/bin/python
 
 import my_functions
-import threading
+import multiprocessing
 import argparse
+import time
 
 user_input = argparse.ArgumentParser()
 user_input.add_argument("--host", "-H", help="Host to connect to (host name " +
@@ -28,24 +29,34 @@ def sshHostRange():
     host_range = option.range.split("-")
     start_range = int(host_range[0])
     end_range = int(host_range[1])
+    range_jobs = []
     for i in range(start_range, end_range + 1):
         if flag_zero and i < 10:
             i = '0' + str(i)
             host = option.user + "@" + option.host + str(i) + "." + \
                 option.domain
-            T = threading.Thread(target=my_functions.autoSSH,
-                                 args=(host,
-                                 option.username,
-                                 option.password))
-            T.start()
+            process = multiprocessing.Process(target=my_functions.autoSSH,
+                                              args=(ssh_host,
+                                              option.username,
+                                              option.password))
+            range_jobs.append(process)
+            process.start()
+            time.sleep(1)
+
         else:
             host = option.user + "@" + option.host + str(i) + "." + \
                 option.domain
-            T = threading.Thread(target=my_functions.autoSSH,
-                                 args=(host,
-                                       option.username,
-                                       option.password))
-            T.start()
+            process = multiprocessing.Process(target=my_functions.autoSSH,
+                                              args=(ssh_host,
+                                              option.username,
+                                              option.password))
+            range_jobs.append(process)
+            process.start()
+            time.sleep(1)
+
+    for j in jobs:
+            j.join()
+            print "\033[0;32m", jobs, "\033[0m"
 
 
 def validateArgumantsAndRun():
@@ -62,13 +73,20 @@ def validateArgumantsAndRun():
 
         else:
             hosts_file = open(option.file, "r").readlines()
+            jobs = []
             for host in hosts_file:
                 ssh_host = host.strip()
-                T = threading.Thread(target=my_functions.autoSSH,
-                                     args=(ssh_host,
-                                           option.username,
-                                           option.password))
-                T.start()
+                process = multiprocessing.Process(target=my_functions.autoSSH,
+                                                  args=(ssh_host,
+                                                  option.username,
+                                                  option.password))
+                jobs.append(process)
+                process.start()
+                time.sleep(1)
+
+            for j in jobs:
+                j.join()
+                print "\033[0;32m", jobs, "\033[0m"
             return True
 
     if not option.host:
@@ -81,8 +99,9 @@ def validateArgumantsAndRun():
         return True
 
     else:
-        host = option.host
-        cmd = my_functions.autoSSH(host, option.username, option.password)
+        cmd = my_functions.autoSSH(option.host,
+                                   option.username,
+                                   option.password)
         if not cmd:
                 print "\033[0;32m" + "Fail to configure auto ssh to %s" +\
                       "\033[0m" % host
