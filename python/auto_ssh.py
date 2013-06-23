@@ -7,8 +7,7 @@ import time
 
 user_input = argparse.ArgumentParser()
 user_input.add_argument("--host", "-H", help="Host to connect to (host name " +
-                        "without domain, if using range host name is " +
-                        "without the number)")
+                        "if using range host name is without the number)")
 user_input.add_argument("--domain", "-D", help="Domain for the host")
 user_input.add_argument("--range", "-R", help="To run on range of hosts, " +
                         "example: 1-10 or 01-10")
@@ -80,12 +79,12 @@ def validateArgumantsAndRun():
         return False
 
     if option.range:
-        HOST_RANGE = option.range.split("-")
+        host_range = option.range.split("-")
         sshHostRange(option.username,
                      option.password,
                      option.host,
                      option.domain,
-                     HOST_RANGE,)
+                     host_range,)
         return True
 
     else:
