@@ -20,7 +20,7 @@ else:
     git_repos = option.repo.split()
     git_folders = Popen(["ls", option.git_folder], stdout=PIPE,
                         stderr=PIPE).communicate()[0].split()
-    rc, repo_list = my_functions.FindInList(git_repos, git_folders)
+    rc, repo_list = my_functions.findInList(git_repos, git_folders)
     if rc == 0:
         for val in repo_list:
             os.chdir(option.git_folder + "/" + val)

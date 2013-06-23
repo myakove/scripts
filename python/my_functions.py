@@ -21,7 +21,6 @@ def autoSSH(host, username, password):
         yb = yum.YumBase().isPackageInstalled("sshpass")
     except ImportError:
         logging.info("If this script fails check if sshpass in installed")
-        pass
 
     if not yb:
         print "sshpass is not installed"
@@ -55,7 +54,7 @@ def autoSSH(host, username, password):
             Popen([echo_cmd], stdout=PIPE, shell=True)
 
         Popen(["sshpass", "-p", password, "ssh-copy-id",
-               username + "@" + host], stdout=PIPE).communicate()[0]
+               username + "@" + host], stdout=PIPE).communicate()
     return True
 
 
@@ -81,14 +80,13 @@ def updateRepoAndInstall(version, hosts_file):
         yb = yum.YumBase().isPackageInstalled("sshpass")
     except ImportError:
         logging.info("If this script fails check if pdsh in installed")
-        pass
 
     if not yb:
         print "pdsh is not installed"
         return False
 
     else:
-        user = "root"
+        linux_user = "root"
         repo_dir = "/etc/yum.repos.d/"
         tmp_file = "/tmp/rhevm.repo"
         host_list = open(hosts_file, "r")
@@ -104,20 +102,19 @@ def updateRepoAndInstall(version, hosts_file):
         repo_file.close()
 
         for host in host_target_list:
-            cmd_scp = Popen(["scp", tmp_file, user + "@" + host + ":" +
+            cmd_scp = Popen(["scp", tmp_file, linux_user + "@" + host + ":" +
                              repo_dir],
                             stdout=PIPE)
-            out_scp, err_scp = cmd_scp.communicate()
+            err_scp = cmd_scp.communicate()[1]
             if err_scp:
                 print "Failed to copy repo file to %s" % host
                 return False
 
-        cmd_clean = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
-                           "clean", "all"], stdout=PIPE)
-        out_clean, err_clean = cmd_clean.communicate()
+        Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
+               "clean", "all"], stdout=PIPE).communicate()
         cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root",
                             "yum", "update", "-y"], stdout=PIPE)
-        out_update, err_update = cmd_update.communicate()
+        out_update = cmd_update.communicate()[0]
         print "Updateing host to %s" % version
         print out_update
 
@@ -132,11 +129,11 @@ def getMacAndIP(interface, host):
                   interface +
                   " | grep HWaddr |awk '{print $5}'"]), shell=True,
                 stdout=PIPE)
-    macout, macerr = mac.communicate()
+    macout = mac.communicate()[0]
     ip = Popen((["ssh -o ConnectTimeout=5 root@" + host + " ifconfig " +
                  interface + " | grep 'inet addr' |cut -d':' -f2|awk \
                  '{print $1}'"]), shell=True, stdout=PIPE)
-    ipout, iperr = ip.communicate()
+    ipout = ip.communicate()[0]
     return macout, ipout
 
 
@@ -154,7 +151,7 @@ def apkRename(apk_path, apk):
     cmd = Popen(("aapt  d  badging " + apk),
                 shell=True,
                 stdin=PIPE, stdout=PIPE, close_fds=True)
-    fdin, fdout = cmd.stdin, cmd.stdout
+    fdout = cmd.communicate()[1]
 
     data = fdout.readlines()
     for line in data:
@@ -203,13 +200,13 @@ def ldapSearch(name):
     print '\n'
 
 
-def IsServiceRunnig(service):
+def isServiceRunnig(service):
     '''
     Description: Check if service is running, retur PID of the service.
     service = service to search for.
     '''
     cmd = Popen(["pgrep", service], stdout=PIPE)
-    out, err = cmd.communicate()
+    out = cmd.communicate()[0]
     list_out = out.split("\n")
     if not out:
         return False
@@ -218,7 +215,7 @@ def IsServiceRunnig(service):
     return True
 
 
-def OpenvpnConnect(username, password, conf_file):
+def openvpnConnect(username, password, conf_file):
     '''
     Description: Connect to openvpn server
     username = User to connect with
@@ -232,19 +229,18 @@ def OpenvpnConnect(username, password, conf_file):
     tmp_file.write(password + "\n")
     tmp_file.close()
     index = 0
-    if IsServiceRunnig("openvpn"):
+    if isServiceRunnig("openvpn"):
         print "Already connected to VPN server"
         return False
 
     else:
-        openvpn = Popen(["sudo", "openvpn", "--config", conf_file,
-                         "--auth-user-pass", pass_file, "--daemon",
-                         "--log", log_file], stdout=PIPE)
-        out, err = openvpn.communicate()
-        clean_tmp_file = Popen(["rm", "-rf", pass_file], stdout=None)
+        Popen(["sudo", "openvpn", "--config", conf_file,
+               "--auth-user-pass", pass_file, "--daemon",
+               "--log", log_file], stdout=PIPE).communicate()
+        Popen(["rm", "-rf", pass_file], stdout=None)
         while index < 30:
             interface = Popen(["ip", "add"], stdout=PIPE)
-            intout, interr = interface.communicate()
+            intout = interface.communicate()[0]
             redhat0 = re.search("redhat0", intout)
             if not redhat0:
                 index += 1
@@ -257,7 +253,7 @@ def OpenvpnConnect(username, password, conf_file):
     return True
 
 
-def ActionOnRemoteHosts(hosts_file, command, username):
+def actionOnRemoteHosts(hosts_file, command, username):
     '''
     Description: Run command on remote linux hosts
     hosts_file = file with hosts to update, one host per line.
@@ -270,7 +266,6 @@ def ActionOnRemoteHosts(hosts_file, command, username):
         yb = yum.YumBase().isPackageInstalled("pdsh")
     except ImportError:
         logging.info("If this script fails check if pdsh in installed")
-        pass
 
     if not yb:
         print "pdsh is not installed"
@@ -279,11 +274,11 @@ def ActionOnRemoteHosts(hosts_file, command, username):
     else:
         cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
                     stdout=PIPE)
-        out, err = cmd.communicate()
+        out = cmd.communicate()[0]
         print out
 
 
-def FindInList(list1=[], list2=[]):
+def findInList(list1=list(), list2=list()):
     '''
     Description: Search for items from list1 in list2, return status and new
     list. status 0 mean that the new list is not empty and status 1 mean that
@@ -369,7 +364,7 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
                                      "build")
                 print active_job.name, "building"
             if action == "info":
-                    active_job.print_data()
+                active_job.print_data()
             if action == "delete":
                 j.delete_job(active_job.name)
                 print active_job.name, "Deleted"

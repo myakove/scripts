@@ -19,6 +19,6 @@ if not (option.hosts_file and option.command):
 else:
     if option.user is None:
         option.user = "root"
-        my_functions.ActionOnRemoteHosts(option.hosts_file,
+        my_functions.actionOnRemoteHosts(option.hosts_file,
                                          option.command,
                                          option.user)
