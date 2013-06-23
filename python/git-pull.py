@@ -5,25 +5,25 @@ import os
 import argparse
 import my_functions
 
-user_input = argparse.ArgumentParser()
-user_input.add_argument('--git_folder', '-G', help="path to git folder")
-user_input.add_argument("--repo", "-R", help="Repo folder to update, use " +
+USER_INPUT = argparse.ArgumentParser()
+USER_INPUT.add_argument('--git_folder', '-G', help="path to git folder")
+USER_INPUT.add_argument("--repo", "-R", help="Repo folder to update, use " +
                         "'folder1 folder2' for multipale folders")
 
-option = user_input.parse_args()
+OPTION = USER_INPUT.parse_args()
 
-if not (option.git_folder and option.repo):
+if not (OPTION.git_folder and OPTION.repo):
     print "Git folder and repo folder must be specify"
-    print user_input.format_usage()
+    print USER_INPUT.format_usage()
 
 else:
-    git_repos = option.repo.split()
-    git_folders = Popen(["ls", option.git_folder], stdout=PIPE,
+    GIT_REPOS = OPTION.repo.split()
+    GIT_FOLDERS = Popen(["ls", OPTION.git_folder], stdout=PIPE,
                         stderr=PIPE).communicate()[0].split()
-    rc, repo_list = my_functions.findInList(git_repos, git_folders)
-    if rc == 0:
-        for val in repo_list:
-            os.chdir(option.git_folder + "/" + val)
+    RC, REPO_LIST = my_functions.findInList(GIT_REPOS, GIT_FOLDERS)
+    if RC == 0:
+        for val in REPO_LIST:
+            os.chdir(OPTION.git_folder + "/" + val)
             print "\033[0;32m" + val + "\033[0m"
             os.system("git checkout master")
             os.system("git pull")

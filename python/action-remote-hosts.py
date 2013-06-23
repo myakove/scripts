@@ -3,22 +3,22 @@
 import my_functions
 import argparse
 
-user_input = argparse.ArgumentParser()
-user_input.add_argument("--hosts_file", "-H", help="hosts file, one host " +
+USER_INPUT = argparse.ArgumentParser()
+USER_INPUT.add_argument("--hosts_file", "-H", help="hosts file, one host " +
                         "per line")
-user_input.add_argument("--command", "-C", help="Command to run on remote " +
+USER_INPUT.add_argument("--command", "-C", help="Command to run on remote " +
                         "hosts")
-user_input.add_argument("--user", "-U", help="User for remote hosts " +
+USER_INPUT.add_argument("--user", "-U", help="User for remote hosts " +
                         "connections (ssh, default is root)")
-option = user_input.parse_args()
+OPTION = USER_INPUT.parse_args()
 
-if not (option.hosts_file and option.command):
+if not (OPTION.hosts_file and OPTION.command):
     print "hosts file and command must be specify"
-    print user_input.format_usage()
+    print USER_INPUT.format_usage()
 
 else:
-    if option.user is None:
-        option.user = "root"
-        my_functions.actionOnRemoteHosts(option.hosts_file,
-                                         option.command,
-                                         option.user)
+    if OPTION.user is None:
+        OPTION.user = "root"
+        my_functions.actionOnRemoteHosts(OPTION.hosts_file,
+                                         OPTION.command,
+                                         OPTION.user)

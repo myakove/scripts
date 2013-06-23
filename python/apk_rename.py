@@ -3,17 +3,17 @@
 import my_functions
 import argparse
 
-user_input = argparse.ArgumentParser()
-user_input.add_argument('--path', '-P', help="path to the APK file")
-user_input.add_argument('--file', '-F', help="APK file to rename")
-option = user_input.parse_args()
+USER_INPUT = argparse.ArgumentParser()
+USER_INPUT.add_argument('--path', '-P', help="path to the APK file")
+USER_INPUT.add_argument('--file', '-F', help="APK file to rename")
+OPTION = USER_INPUT.parse_args()
 
-if not (option.path and option.file):
+if not (OPTION.path and OPTION.file):
     print "Path and APK file must be specify"
-    print user_input.format_usage()
+    print USER_INPUT.format_usage()
 
 else:
-    apk_path = option.path.split('/')
-    apk = option.file
+    APK_PATH = OPTION.path.split('/')
+    APK = OPTION.file
 
-    my_functions.apkRename(apk_path, apk)
+    my_functions.apkRename(APK_PATH, APK)

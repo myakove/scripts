@@ -3,27 +3,27 @@
 import argparse
 import my_functions
 
-user_input = argparse.ArgumentParser()
-user_input.add_argument("--server", "-SRV", help="Jenkins server")
-user_input.add_argument("--username", "-U", help="Username for Jenkins server")
-user_input.add_argument("--password", "-P", help="Password got Jenkins server")
-user_input.add_argument("--action", "-A", help="action to run on the job,"
+USER_INPUT = argparse.ArgumentParser()
+USER_INPUT.add_argument("--server", "-SRV", help="Jenkins server")
+USER_INPUT.add_argument("--username", "-U", help="Username for Jenkins server")
+USER_INPUT.add_argument("--password", "-P", help="Password got Jenkins server")
+USER_INPUT.add_argument("--action", "-A", help="action to run on the job,"
                         "enable, disable, print (name), delete, info, "
                         "is_queued and build")
-user_input.add_argument("--search", "-S", help="search for job to apply the"
+USER_INPUT.add_argument("--search", "-S", help="search for job to apply the"
                         "action")
-user_input.add_argument("--view", "-V", help="Jenkins view")
-user_input.add_argument("--nview", "-NV", help="Nested Jenkins view")
-option = user_input.parse_args()
+USER_INPUT.add_argument("--view", "-V", help="Jenkins view")
+USER_INPUT.add_argument("--nview", "-NV", help="Nested Jenkins view")
+OPTION = USER_INPUT.parse_args()
 
-if not (option.server and
-        option.action and
-        option.view and
-        option.nview):
+if not (OPTION.server and
+        OPTION.action and
+        OPTION.view and
+        OPTION.nview):
     print "Server, search, action, view and nview must be specify"
-    print user_input.format_usage()
+    print USER_INPUT.format_usage()
 
 else:
-    my_functions.jenkinsCMD(option.server, option.action, option.view,
-                            option.nview, username=option.username,
-                            password=option.password, search=option.search)
+    my_functions.jenkinsCMD(OPTION.server, OPTION.action, OPTION.view,
+                            OPTION.nview, username=OPTION.username,
+                            password=OPTION.password, search=OPTION.search)

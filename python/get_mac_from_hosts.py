@@ -3,22 +3,22 @@
 import my_functions
 import argparse
 
-user_input = argparse.ArgumentParser()
-user_input.add_argument('--interface', '-I', help="Interface to query")
-user_input.add_argument('--host_file', '-H', help="File with hosts list, " +
+USER_INPUT = argparse.ArgumentParser()
+USER_INPUT.add_argument('--interface', '-I', help="Interface to query")
+USER_INPUT.add_argument('--host_file', '-H', help="File with hosts list, " +
                         "one host per line")
-option = user_input.parse_args()
+OPTION = USER_INPUT.parse_args()
 
-if not (option.interface and option.host_file):
+if not (OPTION.interface and OPTION.host_file):
     print "Interface and hosts file must be specify"
-    print user_input.format_usage()
+    print USER_INPUT.format_usage()
 
 else:
-    hosts_tmp = open(option.host_file, "r").readlines()
-    hosts_file = [line.strip() for line in hosts_tmp]
+    HOSTS_TMP = open(OPTION.host_file, "r").readlines()
+    HOSTS_FILE = [line.strip() for line in HOSTS_TMP]
 
-    for host in hosts_file:
-        macout, ipout = my_functions.getMacAndIP(option.interface, host)
+    for host in HOSTS_FILE:
+        macout, ipout = my_functions.getMacAndIP(OPTION.interface, host)
         print "\033[0;33m" + "%s :" % host + "\033[0m"
         print "MAC address: " + "\033[0;32m" + macout + "\033[0m"
         print "IP address : " + "\033[0;32m" + ipout + "\033[0m"
