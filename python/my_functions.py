@@ -254,29 +254,20 @@ def openvpnConnect(username, password, conf_file):
     return True
 
 
-def actionOnRemoteHosts(hosts_file, command, username):
+def actionOnRemoteHosts(host, command, username):
     '''
     Description: Run command on remote linux hosts
-    hosts_file = file with hosts to update, one host per line.
+    host = host to run the remote command.
     command - command to run on remote hosts.
     username - user for ssh connection to remote host
     '''
-    yb = True
-    try:
-        import yum
-        yb = yum.YumBase().isPackageInstalled("pdsh")
-    except ImportError:
-        logging.info("If this script fails check if pdsh in installed")
-
-    if not yb:
-        print "pdsh is not installed"
+    remote_command = "".join("ssh " + username + "@" + host + " " + command)
+    cmd = Popen([remote_command], stdout=PIPE, stderr=PIPE, shell=True)
+    out, err = cmd.communicate()
+    if err:
         return False
-
-    else:
-        cmd = Popen(["pdsh", "-l", username, "-w", "^" + hosts_file, command],
-                    stdout=PIPE)
-        out = cmd.communicate()[0]
-        print out
+    print out
+    return True
 
 
 def findInList(list1=list(), list2=list()):
@@ -386,12 +377,12 @@ def sendEmail(server, msg, mail_from, mail_to, server_port=None):
     if server_port:
         server = smtplib.SMTP(server, server_port)
         if not server:
-            logging.error("Failed to connect to SMTP server %s" % (server))
+            print "Failed to connect to SMTP server %s" % server
             return False
 
     server = smtplib.SMTP(server)
     if not server:
-        logging.error("Failed to connect to SMTP server %s" % (server))
+        print "Failed to connect to SMTP server %s" % server
         return False
 
     server.sendmail(mail_from, mail_to, msg)
