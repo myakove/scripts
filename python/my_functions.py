@@ -4,6 +4,7 @@ import re
 import os
 import user
 import time
+import smtplib
 import logging
 from subprocess import Popen, PIPE
 from commands import getoutput
@@ -33,17 +34,19 @@ def autoSSH(host, username, password):
         ssh_path = home + '/' + ssh_dir + '/' + ssh_file
         know_host = open(ssh_path, "r").readlines()
 
-        host_ip = Popen(["host", host], stdout=PIPE).communicate()[0]
+        host_ip = Popen(["host", host], stdout=PIPE,
+                        shell=False).communicate()[0]
         host_ip_addr = host_ip.split()
 
         for line in know_host:
             if host in line:
-                Popen(["ssh-keygen", "-R", host], stdout=PIPE)
+                Popen(["ssh-keygen", "-R", host], stdout=PIPE, shell=False)
             if host_ip_addr[3] in line:
-                Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE)
+                Popen(["ssh-keygen", "-R", host_ip_addr[3]], stdout=PIPE,
+                      shell=False)
 
         host_key = Popen(["ssh-keyscan", "-T", "5", host],
-                         stdout=PIPE).communicate()[0]
+                         stdout=PIPE, shell=False).communicate()[0]
 
         if host_key == "":
             print "\033[0;33m" + "No ssh keys from %s" % host + "\033[0m"
@@ -68,55 +71,53 @@ def hostAlive(host):
         return True
 
 
-def updateRepoAndInstall(version, hosts_file):
+def updateRepoAndInstall(version, host):
     '''
     Description: Update rhevm.repo to desire build and update the hosts
     version = build version to update to.
     hosts_file = file with hosts to update, one host per line.
     '''
-    yb = True
-    try:
-        import yum
-        yb = yum.YumBase().isPackageInstalled("sshpass")
-    except ImportError:
-        logging.info("If this script fails check if pdsh in installed")
+    linux_user = "root"
+    repo_dir = "/etc/yum.repos.d/"
+    tmp_file = "/tmp/rhevm.repo"
+    repo_file = open(tmp_file, "w")
+    repo_file.write("[rhevm]" + "\n")
+    repo_file.write("name=RHEVM" + "\n")
+    repo_file.write("baseurl=http://bob.eng.lab.tlv.redhat.com/builds/" +
+                    version + "\n")
+    repo_file.write("gpgcheck=0" + "\n")
+    repo_file.write("enable=1" + "\n")
+    repo_file.close()
 
-    if not yb:
-        print "pdsh is not installed"
+    cmd_yum = Popen(["ssh", linux_user + "@" + host, "ps -ef | grep yum | \
+                     grep -v grep"],
+                    stdout=PIPE, stderr=PIPE, shell=False)
+    out_yum = cmd_yum.communicate()[0]
+    if out_yum:
+        print "yum already in progress, try again later. host: %s" % host
         return False
 
-    else:
-        linux_user = "root"
-        repo_dir = "/etc/yum.repos.d/"
-        tmp_file = "/tmp/rhevm.repo"
-        host_list = open(hosts_file, "r")
-        host_target_list = [line.strip() for line in host_list]
+    cmd_scp = Popen(["scp", tmp_file, linux_user + "@" + host + ":" +
+                     repo_dir],
+                    stdout=PIPE, stderr=PIPE, shell=False)
+    err_scp = cmd_scp.communicate()[1]
+    print err_scp
+    if err_scp:
+        print "Fail to copy repo file to %s" % host
+        return False
+    print "repo file succesfully copied to %s" % host
 
-        repo_file = open(tmp_file, "w")
-        repo_file.write("[rhevm]" + "\n")
-        repo_file.write("name=RHEVM" + "\n")
-        repo_file.write("baseurl=http://bob.eng.lab.tlv.redhat.com/builds/" +
-                        version + "\n")
-        repo_file.write("gpgcheck=0" + "\n")
-        repo_file.write("enable=1" + "\n")
-        repo_file.close()
-
-        for host in host_target_list:
-            cmd_scp = Popen(["scp", tmp_file, linux_user + "@" + host + ":" +
-                             repo_dir],
-                            stdout=PIPE)
-            err_scp = cmd_scp.communicate()[1]
-            if err_scp:
-                print "Failed to copy repo file to %s" % host
-                return False
-
-        Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root", "yum",
-               "clean", "all"], stdout=PIPE).communicate()
-        cmd_update = Popen(["pdsh", "-w", "^" + hosts_file, "-l", "root",
-                            "yum", "update", "-y"], stdout=PIPE)
-        out_update = cmd_update.communicate()[0]
-        print "Updateing host to %s" % version
-        print out_update
+    Popen(["ssh", linux_user + "@" + host, "yum clean all"],
+          stdout=PIPE, stderr=PIPE, shell=False).communicate()
+    yum_update = Popen(["ssh", linux_user + "@" + host, "yum update -y"],
+                       stdout=PIPE, stderr=PIPE, shell=False)
+    out_yum_update, err_yum_update = yum_update.communicate()
+    if err_yum_update:
+        print "Failed to update %s to version %s" % (host, version)
+        print err_yum_update
+        return False
+    print out_yum_update
+    return True
 
 
 def getMacAndIP(interface, host):
@@ -371,4 +372,29 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
             if action == "is_queued":
                 queued = active_job.is_queued()
                 print active_job.name, "queued: ", queued
+
+
+def sendEmail(server, msg, mail_from, mail_to, server_port=None):
+    '''
+    Basic function to send email
+    server = SMTP server
+    msg = the email to send
+    mail_from = mail from address
+    mail_to = mail to address
+    server_port = SMTP server port if needed
+    '''
+    if server_port:
+        server = smtplib.SMTP(server, server_port)
+        if not server:
+            logging.error("Failed to connect to SMTP server %s" % (server))
+            return False
+
+    server = smtplib.SMTP(server)
+    if not server:
+        logging.error("Failed to connect to SMTP server %s" % (server))
+        return False
+
+    server.sendmail(mail_from, mail_to, msg)
+    return logging.info("Sending email to %s" % (mail_to))
+
 

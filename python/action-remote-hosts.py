@@ -12,13 +12,15 @@ USER_INPUT.add_argument("--user", "-U", help="User for remote hosts " +
                         "connections (ssh, default is root)")
 OPTION = USER_INPUT.parse_args()
 
+if OPTION.user is None:
+    OPTION.user = "root"
+
 if not (OPTION.hosts_file and OPTION.command):
     print "hosts file and command must be specify"
     print USER_INPUT.format_usage()
 
 else:
-    if OPTION.user is None:
-        OPTION.user = "root"
-        my_functions.actionOnRemoteHosts(OPTION.hosts_file,
-                                         OPTION.command,
-                                         OPTION.user)
+    OPTION.user = "root"
+    my_functions.actionOnRemoteHosts(OPTION.hosts_file,
+                                     OPTION.command,
+                                     OPTION.user)
