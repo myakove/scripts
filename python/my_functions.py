@@ -9,6 +9,7 @@ import logging
 from subprocess import Popen, PIPE
 from commands import getoutput
 
+LIST = []
 
 def autoSSH(host, username, password):
     '''
@@ -71,7 +72,7 @@ def hostAlive(host):
         return True
 
 
-def updateRepoAndInstall(version, host):
+def updateRepoAndInstall(version, host, yum_clean=False):
     '''
     Description: Update rhevm.repo to desire build and update the hosts
     version = build version to update to.
@@ -107,16 +108,13 @@ def updateRepoAndInstall(version, host):
         return False
     print "repo file succesfully copied to %s" % host
 
-    Popen(["ssh", linux_user + "@" + host, "yum clean all"],
-          stdout=PIPE, stderr=PIPE, shell=False).communicate()
-    yum_update = Popen(["ssh", linux_user + "@" + host, "yum update -y"],
-                       stdout=PIPE, stderr=PIPE, shell=False)
-    out_yum_update, err_yum_update = yum_update.communicate()
-    if err_yum_update:
+    if yum_clean:
+        actionOnRemoteHosts(host, "yum clean all", linux_user)
+    yum_update = actionOnRemoteHosts(host, "yum update -y", linux_user)
+
+    if not yum_update:
         print "Failed to update %s to version %s" % (host, version)
-        print err_yum_update
         return False
-    print out_yum_update
     return True
 
 
@@ -266,8 +264,8 @@ def actionOnRemoteHosts(host, command, username):
     out, err = cmd.communicate()
     if err:
         return False
-    print out
-    return True
+    print "\033[0;35m" + host + "\033[0m" + ": ", out
+    return out
 
 
 def findInList(list1=list(), list2=list()):

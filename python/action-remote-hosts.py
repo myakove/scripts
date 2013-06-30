@@ -6,30 +6,25 @@ import multiprocessing
 
 USER_INPUT = argparse.ArgumentParser()
 USER_INPUT.add_argument("--hosts_file", "-H", help="hosts file, one host " +
-                        "per line")
+                        "per line", required=True)
 USER_INPUT.add_argument("--command", "-C", help="Command to run on remote " +
-                        "hosts")
+                        "hosts", required=True)
 USER_INPUT.add_argument("--user", "-U", help="User for remote hosts " +
                         "connections (ssh, default is root)", default="root")
 OPTION = USER_INPUT.parse_args()
 
-if not (OPTION.hosts_file and OPTION.command):
-    print "hosts file and command must be specify"
-    print USER_INPUT.format_usage()
+POOL = multiprocessing.Pool(20)
+OUTPUT = ""
+JOBS = []
+HOSTS = open(OPTION.hosts_file, "r").readlines()
+for host in HOSTS:
+    ssh_host = host.strip()
+    PROCESS = multiprocessing.Process(target=actionOnRemoteHosts,
+                                      args=(ssh_host,
+                                      OPTION.command, OPTION.user))
+    JOBS.append(PROCESS)
+    PROCESS.start()
 
-else:
-    OUTPUT = ""
-    JOBS = []
-    HOSTS = open(OPTION.hosts_file, "r").readlines()
-    for host in HOSTS:
-        ssh_host = host.strip()
-        PROCESS = multiprocessing.Process(target=actionOnRemoteHosts,
-                                          args=(ssh_host, OPTION.command,
-                                                OPTION.user))
-        JOBS.append(PROCESS)
-        PROCESS.start()
-        print type(PROCESS)
-
-    for j in JOBS:
-        j.join()
+for j in JOBS:
+    j.join()
 
