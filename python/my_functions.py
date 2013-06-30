@@ -102,14 +102,14 @@ def updateRepoAndInstall(version, host, yum_clean=False):
                      repo_dir],
                     stdout=PIPE, stderr=PIPE, shell=False)
     err_scp = cmd_scp.communicate()[1]
-    print err_scp
+
     if err_scp:
         print "Fail to copy repo file to %s" % host
         return False
-    print "repo file succesfully copied to %s" % host
 
     if yum_clean:
         actionOnRemoteHosts(host, "yum clean all", linux_user)
+
     yum_update = actionOnRemoteHosts(host, "yum update -y", linux_user)
 
     if not yum_update:
