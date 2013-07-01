@@ -1,7 +1,10 @@
 #! /usr/bin/python
 
-import my_functions
+from my_functions import hostAlive
+from my_functions import COLORS
 import argparse
+
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
 USER_INPUT = argparse.ArgumentParser()
 USER_INPUT.add_argument("--host", "-H", help="File with hosts list, one " +
@@ -17,10 +20,12 @@ else:
     HOSTS = [line.strip() for line in HOSTS_LIST]
 
     for host in HOSTS:
-        if my_functions.hostAlive(host):
-            print "\033[0;33m" + "%s " % host + "\033[0m" + "is " + \
-                  "\033[0;31m" + "down" + "\033[0m"
+        if hostAlive(host):
+            OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
+                              COLORS["red"], "DOWN", COLORS["clear"]]) % host
+            print OUTPUT
         else:
-            print "\033[0;33m" + "%s " % host + "\033[0m" + "is " + \
-                  "\033[0;32m" + "alive" + "\033[0m"
+            OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
+                              COLORS["green"], "UP", COLORS["clear"]]) % host
+            print OUTPUT
 

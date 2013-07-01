@@ -10,6 +10,24 @@ from subprocess import Popen, PIPE
 from commands import getoutput
 
 LIST = []
+COLORS = {"black": "\033[0;30m",
+          "dark_gray": "\033[1;30m",
+          "blue": "\033[0;34m",
+          "light_blue": "\033[1;34m",
+          "green": "\033[0;32m",
+          "light_green": "\033[1;32m",
+          "cyan": "\033[0;36m",
+          "light_cyan": "\033[1;36m",
+          "red": "\033[0;31m",
+          "light_red": "\033[1;31m",
+          "purple": "\033[0;35m",
+          "light_purple": "\033[1;35m",
+          "brown": "\033[0;33m",
+          "yellow": "\033[1;33m",
+          "light_gray": "\033[0;37m",
+          "white": "\033[1;37m",
+          "clear": "\033[0m"}
+
 
 def autoSSH(host, username, password):
     '''
@@ -50,7 +68,9 @@ def autoSSH(host, username, password):
                          stdout=PIPE, shell=False).communicate()[0]
 
         if host_key == "":
-            print "\033[0;33m" + "No ssh keys from %s" % host + "\033[0m"
+            err_output = "".join([COLORS["red"], " No ssh keys from %s",
+                                  COLORS["clear"]])
+            print err_output % host
             return False
 
         else:
@@ -67,9 +87,10 @@ def hostAlive(host):
     Description: Check if remote host is alive using ssh
     host = host to connect to
     '''
-    if os.system("ssh -o ConnectTimeout=5 root@" + host +
-                 " exit &> /dev/null"):
-        return True
+    if not os.system("ssh -o ConnectTimeout=5 root@" + host +
+                     " exit &> /dev/null"):
+        return False
+    return True
 
 
 def updateRepoAndInstall(version, host, yum_clean=False):
@@ -178,7 +199,9 @@ def ldapSearch(name):
     if result.find('uid:') == -1:
         result = getoutput(search_string_cn)
         if result.find('cn:') == -1:
-            print "\033[01;41m" + 'User not found' + "\033[0m"
+            err_output = "".join([COLORS["red"], "User not found",
+                                  COLORS["clear"]])
+            print COLORS["brown"], name, err_output
 
     split_result = result.split('\n')
 
@@ -194,8 +217,9 @@ def ldapSearch(name):
                 if key == 'dn:':
                     print '\n'
                 else:
-                    print line.replace(key, "\033[01;10m" + param_dict[key] +
-                                       "\033[0m")
+                    output = "".join([key, COLORS["brown"], param_dict[key],
+                                      COLORS["clear"]])
+                    print line.replace(output)
     print '\n'
 
 
@@ -264,7 +288,8 @@ def actionOnRemoteHosts(host, command, username):
     out, err = cmd.communicate()
     if err:
         return False
-    print "\033[0;35m" + host + "\033[0m" + ": ", out
+    output = "".join([COLORS["brown"], host + ": " + COLORS["clear"], out])
+    print output
     return out
 
 
@@ -321,46 +346,52 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
             if search in job:
                 if action == "enable":
                     active_job.enable()
-                    print job, "enabled"
+                    print COLORS["brown"], job, COLORS["clear"], "enabled"
                 if action == "disable":
                     active_job.disable()
-                    print job, "disabled"
+                    print COLORS["brown"], job, COLORS["clear"], "disabled"
                 if action == "print":
-                    print active_job.name
+                    print COLORS["brown"], active_job.name
                 if action == "build":
                     active_job.post_data(active_job.get_build_triggerurl()[0],
                                          "build")
-                    print active_job.name, "building"
+                    print COLORS["brown"], active_job.name, COLORS["clear"], \
+                        "building"
                 if action == "info":
                     active_job.print_data()
                 if action == "delete":
                     j.delete_job(active_job.name)
-                    print active_job.name, "Deleted"
+                    print COLORS["brown"], active_job.name, COLORS["clear"], \
+                        "Deleted"
                 if action == "is_queued":
                     queued = active_job.is_queued()
-                    print active_job.name, "queued: ", queued
+                    print COLORS["brown"], active_job.name, COLORS["clear"], \
+                        "queued: ", queued
 
         else:
             if action == "enable":
                 active_job.enable()
-                print job, "enabled"
+                print COLORS["brown"], job, COLORS["clear"], "enabled"
             if action == "disable":
                 active_job.disable()
-                print job, "disabled"
+                print COLORS["brown"], job, COLORS["clear"], "disabled"
             if action == "print":
-                print active_job.name
+                print COLORS["brown"], active_job.name
             if action == "build":
                 active_job.post_data(active_job.get_build_triggerurl()[0],
                                      "build")
-                print active_job.name, "building"
+                print COLORS["brown"], active_job.name, COLORS["clear"], \
+                    "building"
             if action == "info":
                 active_job.print_data()
             if action == "delete":
                 j.delete_job(active_job.name)
-                print active_job.name, "Deleted"
+                print COLORS["brown"], active_job.name, COLORS["clear"], \
+                    "Deleted"
             if action == "is_queued":
                 queued = active_job.is_queued()
-                print active_job.name, "queued: ", queued
+                print COLORS["brown"], active_job.name, COLORS["clear"], \
+                    "queued: ", queued
 
 
 def sendEmail(server, msg, mail_from, mail_to, server_port=None):
@@ -384,6 +415,5 @@ def sendEmail(server, msg, mail_from, mail_to, server_port=None):
         return False
 
     server.sendmail(mail_from, mail_to, msg)
-    return logging.info("Sending email to %s" % (mail_to))
-
-
+    print "Sending email to %s" % mail_to
+    return True
