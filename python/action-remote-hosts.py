@@ -13,8 +13,6 @@ USER_INPUT.add_argument("--user", "-U", help="User for remote hosts " +
                         "connections (ssh, default is root)", default="root")
 OPTION = USER_INPUT.parse_args()
 
-POOL = multiprocessing.Pool(20)
-OUTPUT = ""
 JOBS = []
 HOSTS = open(OPTION.hosts_file, "r").readlines()
 for host in HOSTS:

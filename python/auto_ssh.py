@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import my_functions
+from my_functions import autoSSH
 import multiprocessing
 import argparse
 import time
@@ -18,6 +18,8 @@ USER_INPUT.add_argument("--password", "-P", help="password to connect to " +
 USER_INPUT.add_argument("--file", "-F", help="File with hosts list, " +
                         "one host per line, don't use host, domain and " +
                         "range when using --file option")
+USER_INPUT.add_argument("--connect", "-C", help="configure auto ssh to one " +
+                        "host and connect to it", nargs='?', const=True)
 OPTION = USER_INPUT.parse_args()
 
 
@@ -33,7 +35,7 @@ def sshHostRange(username, password, host, domain, host_range=list()):
             else:
                 idx = "0%d" % i
         active_host = "".join([host, str(idx), ".", domain])
-        process = multiprocessing.Process(target=my_functions.autoSSH,
+        process = multiprocessing.Process(target=autoSSH,
                                           args=(active_host,
                                           username,
                                           password))
@@ -43,7 +45,6 @@ def sshHostRange(username, password, host, domain, host_range=list()):
 
     for j in range_jobs:
         j.join()
-        print "\033[0;32m", range_jobs, "\033[0m"
 
 
 def validateArgumantsAndRun():
@@ -66,7 +67,7 @@ def validateArgumantsAndRun():
             jobs = []
             for host in hosts_file:
                 ssh_host = host.strip()
-                process = multiprocessing.Process(target=my_functions.autoSSH,
+                process = multiprocessing.Process(target=autoSSH,
                                                   args=(ssh_host,
                                                   OPTION.username,
                                                   OPTION.password))
@@ -76,11 +77,11 @@ def validateArgumantsAndRun():
 
             for j in jobs:
                 j.join()
-                print "\033[0;32m", jobs, "\033[0m"
+
             return True
 
     if not OPTION.host:
-        print "Host or file must be specify"
+        print "Host or connect must be specify"
         print USER_INPUT.format_usage()
         return False
 
@@ -93,13 +94,11 @@ def validateArgumantsAndRun():
                      host_range,)
         return True
 
-    else:
-        cmd = my_functions.autoSSH(OPTION.host,
-                                   OPTION.username,
-                                   OPTION.password)
-        if not cmd:
-            print "\033[0;32m" + "Fail to configure auto ssh to %s"\
-                  % OPTION.host + "\033[0m"
-            return False
+    if OPTION.host:
+        autoSSH(OPTION.host,
+                OPTION.username,
+                OPTION.password,
+                OPTION.connect)
+        return True
 
 validateArgumantsAndRun()

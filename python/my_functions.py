@@ -29,7 +29,7 @@ COLORS = {"black": "\033[0;30m",
           "clear": "\033[0m"}
 
 
-def autoSSH(host, username, password):
+def autoSSH(host, username, password, connect=False):
     '''
     Description: Get remote host ssh key and add it to local know_hosts file
     ssh-copy-id to remote host to enable ssh connect without password
@@ -79,6 +79,11 @@ def autoSSH(host, username, password):
 
         Popen(["sshpass", "-p", password, "ssh-copy-id",
                username + "@" + host], stdout=PIPE).communicate()
+
+        if connect:
+            cmd_line = "".join(["ssh ", username + "@" + host])
+            Popen([cmd_line], shell=True).communicate()
+
     return True
 
 

@@ -4,8 +4,6 @@ from my_functions import hostAlive
 from my_functions import COLORS
 import argparse
 
-BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
-
 USER_INPUT = argparse.ArgumentParser()
 USER_INPUT.add_argument("--host", "-H", help="File with hosts list, one " +
                         "host per line")
@@ -28,4 +26,3 @@ else:
             OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
                               COLORS["green"], "UP", COLORS["clear"]]) % host
             print OUTPUT
-

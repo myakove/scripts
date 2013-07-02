@@ -1,6 +1,6 @@
 #! /bin/python
 
-import my_functions
+from my_functions import getMacAndIP, COLORS
 import argparse
 
 USER_INPUT = argparse.ArgumentParser()
@@ -14,12 +14,13 @@ if not (OPTION.interface and OPTION.host_file):
     print USER_INPUT.format_usage()
 
 else:
-    HOSTS_TMP = open(OPTION.host_file, "r").readlines()
-    HOSTS_FILE = [line.strip() for line in HOSTS_TMP]
+    HOSTS_FILE = open(OPTION.host_file, "r").readlines()
 
     for host in HOSTS_FILE:
-        macout, ipout = my_functions.getMacAndIP(OPTION.interface, host)
-        print "\033[0;33m" + "%s :" % host + "\033[0m"
-        print "MAC address: " + "\033[0;32m" + macout + "\033[0m"
-        print "IP address : " + "\033[0;32m" + ipout + "\033[0m"
+        active_host = host.strip()
+        macout, ipout = getMacAndIP(OPTION.interface, active_host)
+        print COLORS["brown"] + active_host, ":", COLORS["clear"]
+        print "MAC address:", COLORS["green"], macout, COLORS["clear"]
+        print "IP address :", COLORS["green"], ipout, COLORS["clear"]
+
 
