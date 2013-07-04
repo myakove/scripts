@@ -347,7 +347,8 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
     Description: Run action on Jenkins jobs (build, delete, disable, enable,
     get info and print job name)
     server = Jenkins server
-    action = action for the job (build, delete, disable, enable, info, print)
+    action = action for the job (build, delete, disable, enable, info, print,
+             is_queue, is_running)
     view = view in jenkins (tab)
     nview = nested view in jenkins (under view tab)
     username = username for Jenkins server
@@ -396,6 +397,10 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
                     queued = active_job.is_queued()
                     print COLORS["brown"], active_job.name, COLORS["clear"], \
                         "queued: ", queued
+                if action == "is_running":
+                    running = active_job.is_running()
+                    print COLORS["brown"], active_job.name, COLORS["clear"], \
+                        "running: ", running
 
         else:
             if action == "enable":
@@ -421,6 +426,10 @@ def jenkinsCMD(server, action, view, nview, username=None, password=None,
                 queued = active_job.is_queued()
                 print COLORS["brown"], active_job.name, COLORS["clear"], \
                     "queued: ", queued
+            if action == "is_running":
+                    running = active_job.is_running()
+                    print COLORS["brown"], active_job.name, COLORS["clear"], \
+                        "running: ", running
 
 
 def sendEmail(server, msg, mail_from, mail_to, server_port=None):

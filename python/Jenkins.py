@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 import argparse
-import my_functions
+from my_functions import jenkinsCMD
 
 USER_INPUT = argparse.ArgumentParser()
 USER_INPUT.add_argument("--server", "-SRV", help="Jenkins server",
@@ -18,6 +18,6 @@ USER_INPUT.add_argument("--nview", "-NV", help="Nested Jenkins view",
                         required=True)
 OPTION = USER_INPUT.parse_args()
 
-my_functions.jenkinsCMD(OPTION.server, OPTION.action, OPTION.view,
-                        OPTION.nview, username=OPTION.username,
-                        password=OPTION.password, search=OPTION.search)
+jenkinsCMD(OPTION.server, OPTION.action, OPTION.view,
+           OPTION.nview, username=OPTION.username,
+           password=OPTION.password, search=OPTION.search)
