@@ -107,6 +107,7 @@ def updateRepoAndInstall(version, host, yum_clean=False):
     linux_user = "root"
     repo_dir = "/etc/yum.repos.d/"
     tmp_file = "/tmp/rhevm.repo"
+
     repo_file = open(tmp_file, "w")
     repo_file.write("[rhevm]" + "\n")
     repo_file.write("name=RHEVM" + "\n")
@@ -114,6 +115,22 @@ def updateRepoAndInstall(version, host, yum_clean=False):
                     version + "\n")
     repo_file.write("gpgcheck=0" + "\n")
     repo_file.write("enable=1" + "\n")
+    repo_file.write("\n\n")
+
+    repo_file.write("[rhel]" + "\n")
+    repo_file.write("name=RHEL_64" + "\n")
+    repo_file.write("baseurl=http://download.eng.tlv.redhat.com/pub/rhel/" +
+                    "released/RHEL-6/6.4/Server/x86_64/os/" + "\n")
+    repo_file.write("enabled=1" + "\n")
+    repo_file.write("gpgcheck=0" + "\n")
+    repo_file.write("\n\n")
+
+    repo_file.write("[rhel-zstream]" + "\n")
+    repo_file.write("name=RHEL_64_Z" + "\n")
+    repo_file.write("baseurl=http://download.eng.tlv.redhat.com/rel-eng/" +
+                    "repos/RHEL-6.4-Z/x86_64/" + "\n")
+    repo_file.write("enabled=1" + "\n")
+    repo_file.write("gpgcheck=0" + "\n")
     repo_file.close()
 
     cmd_yum = Popen(["ssh", linux_user + "@" + host, "ps -ef | grep yum | \
@@ -121,7 +138,8 @@ def updateRepoAndInstall(version, host, yum_clean=False):
                     stdout=PIPE, stderr=PIPE, shell=False)
     out_yum = cmd_yum.communicate()[0]
     if out_yum:
-        print "yum already in progress, try again later. host: %s" % host
+        print "yum already in progress, host: ",\
+            COLORS["brown"], host, COLORS["clear"]
         return False
 
     cmd_scp = Popen(["scp", tmp_file, linux_user + "@" + host + ":" +
@@ -130,7 +148,9 @@ def updateRepoAndInstall(version, host, yum_clean=False):
     err_scp = cmd_scp.communicate()[1]
 
     if err_scp:
-        print "Fail to copy repo file to %s" % host
+        print err_scp
+        print "Fail to copy repo file to :",\
+            COLORS["brown"], host, COLORS["clear"]
         return False
 
     if yum_clean:
@@ -139,7 +159,10 @@ def updateRepoAndInstall(version, host, yum_clean=False):
     yum_update = actionOnRemoteHosts(host, "yum update -y", linux_user)
 
     if not yum_update:
-        print "Failed to update %s to version %s" % (host, version)
+        err = "".join(["Failed to update ", COLORS["brown"], host,
+                       COLORS["clear"], " to version ", COLORS["brown"],
+                       version, COLORS["clear"]])
+        print err
         return False
     return True
 
@@ -292,6 +315,7 @@ def actionOnRemoteHosts(host, command, username):
     cmd = Popen([remote_command], stdout=PIPE, stderr=PIPE, shell=True)
     out, err = cmd.communicate()
     if err:
+        print err
         return False
     output = "".join([COLORS["brown"], host + ": " + COLORS["clear"], out])
     print output

@@ -6,23 +6,18 @@ import argparse
 
 USER_INPUT = argparse.ArgumentParser()
 USER_INPUT.add_argument("--host", "-H", help="File with hosts list, one " +
-                        "host per line")
+                        "host per line", required=True)
 OPTION = USER_INPUT.parse_args()
 
-if not OPTION.host:
-    print "Hosts file must be specify"
-    print USER_INPUT.format_usage()
+HOSTS_LIST = open(OPTION.host, "r")
+HOSTS = [line.strip() for line in HOSTS_LIST]
 
-else:
-    HOSTS_LIST = open(OPTION.host, "r")
-    HOSTS = [line.strip() for line in HOSTS_LIST]
-
-    for host in HOSTS:
-        if hostAlive(host):
-            OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
-                              COLORS["red"], "DOWN", COLORS["clear"]]) % host
-            print OUTPUT
-        else:
-            OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
-                              COLORS["green"], "UP", COLORS["clear"]]) % host
-            print OUTPUT
+for host in HOSTS:
+    if hostAlive(host):
+        OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
+                          COLORS["red"], "DOWN", COLORS["clear"]]) % host
+        print OUTPUT
+    else:
+        OUTPUT = "".join([COLORS["brown"], "%s", COLORS["clear"], " is ",
+                          COLORS["green"], "UP", COLORS["clear"]]) % host
+        print OUTPUT

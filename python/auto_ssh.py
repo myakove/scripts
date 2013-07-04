@@ -14,7 +14,7 @@ USER_INPUT.add_argument("--range", "-R", help="To run on range of hosts, " +
 USER_INPUT.add_argument("--username", "-U", default="root", help="user to " +
                         "connect to the host")
 USER_INPUT.add_argument("--password", "-P", help="password to connect to " +
-                        "the host")
+                        "the host", required=True)
 USER_INPUT.add_argument("--file", "-F", help="File with hosts list, " +
                         "one host per line, don't use host, domain and " +
                         "range when using --file option")
@@ -51,15 +51,10 @@ def validateArgumantsAndRun():
     '''
     Validate syntax
     '''
-    if not OPTION.password:
-        print "password must be specify"
-        print USER_INPUT.format_usage()
-        return False
-
     if OPTION.file:
         if (OPTION.host or OPTION.domain or OPTION.range):
             print "file can only be sent with --user and --password"
-            print USER_INPUT.format_usage()
+            USER_INPUT.print_help()
             return False
 
         else:
@@ -82,7 +77,7 @@ def validateArgumantsAndRun():
 
     if not OPTION.host:
         print "Host or connect must be specify"
-        print USER_INPUT.format_usage()
+        USER_INPUT.print_help()
         return False
 
     if OPTION.range:
