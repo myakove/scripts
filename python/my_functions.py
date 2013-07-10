@@ -215,7 +215,7 @@ def apkRename(apk_path, apk):
     os.system("mv " + apk + " " + newapkpathandname)
 
 
-def ldapSearch(name):
+def ldapSearchOLD(name):
     '''
     Description: Search for user in Redhat corp ldap server
     user = User to search for.
@@ -229,7 +229,8 @@ def ldapSearch(name):
         if result.find('cn:') == -1:
             err_output = "".join([COLORS["red"], "User not found",
                                   COLORS["clear"]])
-            print COLORS["brown"], name, err_output
+            print COLORS["brown"], name, COLORS["clear"], err_output
+            return False
 
     split_result = result.split('\n')
 
@@ -245,10 +246,14 @@ def ldapSearch(name):
                 if key == 'dn:':
                     print '\n'
                 else:
-                    output = "".join([key, COLORS["brown"], param_dict[key],
-                                      COLORS["clear"]])
-                    print line.replace(output)
+                    new_line = line.split(" ")
+                    param = new_line[1:]
+                    title = new_line[0].replace(key, param_dict[key])
+                    output = "".join([COLORS["light_green"], title,
+                                      COLORS["clear"], " ".join(param)])
+                    print output
     print '\n'
+    return True
 
 
 def isServiceRunnig(service):
@@ -455,3 +460,45 @@ def sendEmail(server, msg, mail_from, mail_to, server_port=None):
     server.sendmail(mail_from, mail_to, msg)
     print "Sending email to %s" % mail_to
     return True
+
+
+def ldapSearch(server, user, domain, port=389):
+    try:
+        import ldap
+    except ImportError:
+        logging.error("python-ldap is not installed")
+        return False
+
+    searchScope = ldap.SCOPE_SUBTREE
+    ldap_server = ldap.open(host=server, port=port)
+    basedomain = domain.split(".")
+    baseDN = "".join(["dc=", basedomain[0], ",dc=", basedomain[1]])
+    retrieveAttributes = ["dn", "cn", "uid", "mail", "telephoneNumber",
+                          "mobile", "rhatLocation", "rhatCostCenterDesc"]
+
+    param_dict = {'dn:': 'dn', 'cn:': 'Full Name:      ', 'uid:': 'IRC:     ' +
+                  '       ', 'mail:': 'Email:          ', 'telephoneNumber:':
+                  'Office Ext:     ', 'mobile:': 'Mobile Phone:   ',
+                  'rhatLocation:': 'Office Location:', 'rhatCostCenterDesc:':
+                  'Job Title:      '}
+
+    for val in retrieveAttributes:
+        ldap_result_id = ldap_server.search(base=baseDN,
+                                            scope=searchScope,
+                                            filterstr="".join([val, "=*",
+                                                               user, "*"]),
+                                            attrlist=retrieveAttributes)
+        result_type, result_data = ldap_server.result(ldap_result_id, 0)
+        if len(result_data) > 0:
+            out, data = result_data[0]
+            for key in data.keys():
+                new_key = key.replace(key, param_dict[key+":"])
+                value = data[key][0]
+                print COLORS["light_green"], new_key, COLORS["clear"], value
+            return True
+
+    err = "".join(["User ", COLORS["red"], user,  COLORS["clear"],
+                   " not found"])
+    print err
+    return False
+
