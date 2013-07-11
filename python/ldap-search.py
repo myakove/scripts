@@ -13,7 +13,12 @@ USER_INPUT.add_argument("--domain", "-D", help="domain of the ldap server")
 USER_INPUT.add_argument("--user", "-U", help="User to sarch for.",
                         required=True)
 USER_INPUT.add_argument("--file", "-F", help="conf file with server and " +
-                        "domain", nargs='?', const=True)
+                        "domain. File should be at $HOME/.ldap-search.conf " +
+                        "Example file:" +
+                        "[SETTING]" +
+                        "server=ldap.server" +
+                        "domain=domain.com",
+                        nargs='?', const=True)
 OPTION = USER_INPUT.parse_args()
 
 

@@ -482,6 +482,7 @@ def ldapSearch(server, user, domain, port=389):
                   'rhatLocation:': 'Office Location:', 'rhatCostCenterDesc:':
                   'Job Title:      '}
 
+    match = False
     for val in retrieveAttributes:
         ldap_result_id = ldap_server.search(base=baseDN,
                                             scope=searchScope,
@@ -495,10 +496,13 @@ def ldapSearch(server, user, domain, port=389):
                 new_key = key.replace(key, param_dict[key+":"])
                 value = data[key][0]
                 print COLORS["light_green"], new_key, COLORS["clear"], value
-            return True
+                match = True
+            print "**********************************************"
 
-    err = "".join(["User ", COLORS["red"], user,  COLORS["clear"],
-                   " not found"])
-    print err
-    return False
+    if not match:
+        err = "".join(["User ", COLORS["red"], user,  COLORS["clear"],
+                       " not found"])
+        print err
+        return False
+    return True
 
